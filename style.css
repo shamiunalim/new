@@ -2282,35 +2282,6 @@ background:rgba(3,28,60,.90);
 border-right-color:var(--line);
 }
 
-/* Video background: memakai URL yang diminta */
-.background-video{
-position:fixed;
-inset:0;
-width:100%;
-height:100%;
-object-fit:cover;
-z-index:-20;
-pointer-events:none;
-opacity:0;
-transition:opacity .35s ease;
-}
-.video-overlay{
-position:fixed;
-inset:0;
-z-index:-19;
-pointer-events:none;
-background:linear-gradient(180deg,rgba(0,7,20,.86),rgba(0,25,65,.68),rgba(0,7,25,.90));
-opacity:0;
-transition:opacity .35s ease;
-}
-body.theme-video .background-video,
-body.theme-video .video-overlay{
-opacity:1;
-}
-body.theme-video .space{
-background:rgba(0,15,40,.20);
-}
-
 /* Aksen dinamis */
 .nav-item.active{
 background:linear-gradient(90deg,var(--accent-soft),rgba(4,53,116,.18));
@@ -2628,4 +2599,235 @@ margin:0;
 .music-mini{width:50px;height:50px;}
 .settings-card{padding:19px;}
 .settings-reset-card{align-items:flex-start;flex-direction:column;}
+}
+
+/* =========================================================
+   MAXIEL LIVE COLOR SYSTEM
+   Semua warna utama berubah langsung dari Pengaturan.
+   ========================================================= */
+body{
+background:var(--dashboard-bg,#020817)!important;
+color:var(--text-main,#f4f7ff);
+}
+
+.space{
+background:var(--dashboard-bg,#020817)!important;
+}
+
+.topbar{
+background:var(--topbar-bg,rgba(1,7,18,.94))!important;
+}
+
+.sidebar{
+background:var(--sidebar-bg,rgba(2,12,28,.96))!important;
+}
+
+.dashboard-hero,
+.dashboard-card,
+.service-card,
+.platform-card,
+.tool-card,
+.developer-card,
+.settings-card{
+background:var(--card-bg,rgba(3,20,46,.78))!important;
+}
+
+.dashboard-card strong,
+.dashboard-hero .hero-title h1,
+.service-card h3,
+.platform-card strong,
+.tool-card h3,
+.developer-name,
+.settings-card h3{
+color:var(--text-main,#f4f7ff);
+}
+
+.platform-card.selected,
+.platform-card:hover,
+.service-card:hover{
+border-color:var(--accent);
+}
+
+input,
+textarea,
+.download-box{
+background:color-mix(in srgb,var(--dashboard-bg,#020817) 78%,var(--card-bg,rgba(3,20,46,.78)))!important;
+}
+
+/* =========================================================
+   SPECIFIC COLOR SETTINGS UI
+   ========================================================= */
+.specific-colors{
+position:relative;
+z-index:1;
+display:grid;
+grid-template-columns:repeat(2,minmax(0,1fr));
+gap:10px;
+}
+
+.specific-color{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:12px;
+min-height:66px;
+padding:11px 12px;
+border:1px solid rgba(255,255,255,.08);
+border-radius:15px;
+background:rgba(255,255,255,.025);
+cursor:pointer;
+transition:.2s ease;
+}
+
+.specific-color:hover{
+transform:translateY(-2px);
+border-color:var(--accent);
+background:var(--accent-soft);
+}
+
+.specific-color span{
+min-width:0;
+}
+
+.specific-color b{
+display:block;
+font-size:11px;
+color:var(--text-main,#f4f7ff);
+}
+
+.specific-color small{
+display:block;
+margin-top:4px;
+font-size:8px!important;
+line-height:1.35;
+letter-spacing:0!important;
+color:#7185a5!important;
+}
+
+.specific-color input[type=color]{
+width:42px;
+height:42px;
+flex:0 0 42px;
+padding:3px;
+border:1px solid rgba(255,255,255,.16);
+border-radius:12px;
+background:transparent;
+cursor:pointer;
+}
+
+.live-color-note{
+position:relative;
+z-index:1;
+margin-top:13px;
+font-size:9px;
+color:#7185a5;
+}
+
+/* =========================================================
+   3D MUSIC BUTTON - KANAN TENGAH
+   ========================================================= */
+.music-player{
+right:14px!important;
+bottom:auto!important;
+top:50%!important;
+transform:translateY(-50%)!important;
+perspective:1000px;
+}
+
+.music-mini{
+position:relative;
+width:58px!important;
+height:58px!important;
+border:1px solid rgba(255,255,255,.16)!important;
+border-radius:15px!important;
+background:linear-gradient(145deg,rgba(20,40,70,.96),rgba(1,7,18,.98))!important;
+transform-style:preserve-3d;
+box-shadow:
+0 7px 0 rgba(0,0,0,.45),
+0 13px 28px rgba(0,0,0,.55),
+inset 2px 2px 5px rgba(255,255,255,.10),
+inset -3px -4px 8px rgba(0,0,0,.65)!important;
+transition:transform .22s ease,box-shadow .22s ease;
+}
+
+.music-mini:hover{
+transform:translateY(-3px) rotateX(8deg) rotateY(-8deg)!important;
+box-shadow:
+0 10px 0 rgba(0,0,0,.42),
+0 20px 38px rgba(0,0,0,.62),
+inset 2px 2px 6px rgba(255,255,255,.13),
+inset -4px -5px 10px rgba(0,0,0,.7)!important;
+}
+
+.music-mini:active{
+transform:translateY(3px) scale(.94)!important;
+box-shadow:
+0 3px 0 rgba(0,0,0,.45),
+0 8px 18px rgba(0,0,0,.55),
+inset 2px 2px 6px rgba(255,255,255,.08),
+inset -3px -4px 8px rgba(0,0,0,.7)!important;
+}
+
+.music-mini span{
+position:relative;
+z-index:3;
+display:grid;
+place-items:center;
+width:100%;
+height:100%;
+font-size:24px!important;
+color:#fff;
+text-shadow:
+0 2px 0 rgba(0,0,0,.65),
+0 0 14px var(--accent)!important;
+transform:translateZ(12px);
+}
+
+.music-mini:before{
+inset:-3px!important;
+border-radius:17px!important;
+padding:3px!important;
+background:conic-gradient(
+from 0deg,
+#ff004c,
+#ff8a00,
+#ffee00,
+#00ff66,
+#00c8ff,
+#7b2cff,
+#ff00c8,
+#ff004c
+)!important;
+animation:musicEdge 2.8s linear infinite!important;
+filter:drop-shadow(0 0 7px rgba(0,180,255,.45));
+}
+
+.music-mini:after{
+inset:-10px!important;
+border-radius:20px!important;
+filter:blur(9px)!important;
+opacity:.72;
+animation:musicEdge 2.8s linear infinite reverse!important;
+}
+
+.music-mini.music-on{
+box-shadow:
+0 7px 0 rgba(0,0,0,.45),
+0 0 28px var(--accent-soft),
+0 16px 35px rgba(0,0,0,.65),
+inset 2px 2px 6px rgba(255,255,255,.12),
+inset -4px -5px 10px rgba(0,0,0,.7)!important;
+}
+
+@media(max-width:600px){
+.music-player{
+right:10px!important;
+}
+.music-mini{
+width:54px!important;
+height:54px!important;
+}
+.specific-colors{
+grid-template-columns:1fr;
+}
 }
