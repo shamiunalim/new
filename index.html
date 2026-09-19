@@ -135,14 +135,6 @@
       </div>
     </button>
 
-<button class="nav-item" data-page="hd-media">
-  <span>✦</span>
-  <div>
-    <b>HD Foto & Video</b>
-    <small>Media enhancer</small>
-  </div>
-</button>
-
     <button class="nav-item" data-page="developer">
       <span>♟</span>
       <div>
@@ -225,13 +217,6 @@
       <p>Download video, audio dan media dari berbagai platform.</p>
       <span>BUKA FITUR →</span>
     </button>
-
-<button class="service-card" type="button" data-page-open="hd-media">
-  <div class="service-icon">✦</div>
-  <h3>HD Foto & Video</h3>
-  <p>Optimasi kualitas foto dan video langsung di browser.</p>
-  <span>BUKA FITUR →</span>
-</button>
 
     <button class="service-card" data-open="converter">
       <div class="service-icon">⇄</div>
@@ -554,97 +539,7 @@
 
 </section>
 
-<!-- ================= HD FOTO & VIDEO ================= -->
 
-<section class="page" id="hd-media">
-
-  <div class="page-header">
-    <small>MEDIA ENHANCER</small>
-    <h1>HD Foto & Video</h1>
-    <p>Tingkatkan resolusi media langsung dari perangkat.</p>
-  </div>
-
-  <div class="hd-grid">
-
-    <div class="tool-card hd-card">
-      <div class="tool-icon">▣</div>
-
-      <h3>HD Foto</h3>
-      <p>Upscale foto tanpa API.</p>
-
-      <input
-        type="file"
-        id="hdImageInput"
-        accept="image/*"
-      >
-
-      <select id="hdImageScale">
-        <option value="1.5">1.5×</option>
-        <option value="2">2×</option>
-        <option value="3">3×</option>
-        <option value="4">4×</option>
-      </select>
-
-      <select id="hdImageFormat">
-        <option value="image/jpeg">JPG</option>
-        <option value="image/webp">WEBP</option>
-        <option value="image/png">PNG</option>
-      </select>
-
-      <div id="hdImagePreview"></div>
-
-      <button id="hdImageProcess" type="button">
-        PROSES FOTO
-      </button>
-
-      <a
-        id="hdImageDownload"
-        class="download-btn"
-        hidden
-      >
-        DOWNLOAD FOTO
-      </a>
-    </div>
-
-    <div class="tool-card hd-card">
-      <div class="tool-icon">▶</div>
-
-      <h3>HD Video</h3>
-      <p>Upscale video langsung di browser.</p>
-
-      <input
-        type="file"
-        id="hdVideoInput"
-        accept="video/*"
-      >
-
-      <select id="hdVideoResolution">
-        <option value="720">720p</option>
-        <option value="1080">1080p</option>
-        <option value="1440">1440p</option>
-        <option value="2160">4K</option>
-      </select>
-
-      <div id="hdVideoPreview"></div>
-
-      <div id="hdVideoProgress"></div>
-
-      <button id="hdVideoProcess" type="button">
-        PROSES VIDEO
-      </button>
-
-      <a
-        id="hdVideoDownload"
-        class="download-btn"
-        hidden
-      >
-        DOWNLOAD VIDEO
-      </a>
-    </div>
-
-  </div>
-
-</section>
 <!-- ================= DEVELOPER ================= -->
 
 <section class="page" id="developer">
@@ -788,7 +683,7 @@
   <span>© 2026</span>
 </footer>
 
-<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js"></script>
 <script type="module" src="app.js"></script>
+
 </body>
 </html>
