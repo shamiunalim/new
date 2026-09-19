@@ -1,6 +1,5 @@
 import { API, TIKTOK_API } from "./api.js"
-import { FFmpeg } from "https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.15/dist/esm/index.js"
-import { fetchFile, toBlobURL } from "https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.2/dist/esm/index.js"
+
 const pages = document.querySelectorAll(".page")
 const navItems = document.querySelectorAll(".nav-item")
 const sidebar = document.getElementById("sidebar")
@@ -16,33 +15,7 @@ const downloadResult = document.getElementById("downloadResult")
 let currentPlatform = "tiktok"
 let currentType = "video"
 
-let ffmpeg = null
-let ffmpegLoaded = false
-async function loadFFmpeg() {
-  if (ffmpegLoaded) return
 
-  ffmpeg = new FFmpeg()
-
-  const baseURL =
-    "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm"
-
-  await ffmpeg.load({
-    coreURL: await toBlobURL(
-      `${baseURL}/ffmpeg-core.js`,
-      "text/javascript"
-    ),
-    wasmURL: await toBlobURL(
-      `${baseURL}/ffmpeg-core.wasm`,
-      "application/wasm"
-    ),
-    workerURL: await toBlobURL(
-      `${baseURL}/ffmpeg-core.worker.js`,
-      "text/javascript"
-    )
-  })
-
-  ffmpegLoaded = true
-}
 // =========================
 // NAVIGATION
 // =========================
@@ -315,162 +288,6 @@ async function downloadMedia() {
   }
 }
 
-
-
-
-
-// =========================
-// HD FOTO
-// =========================
-
-async function processHDPhoto(file, scale = 2) {
-
-  const url = URL.createObjectURL(file)
-
-  try {
-
-    const img = new Image()
-
-    img.src = url
-
-    await img.decode()
-
-    const canvas = document.createElement("canvas")
-
-    canvas.width =
-      Math.round(img.naturalWidth * scale)
-
-    canvas.height =
-      Math.round(img.naturalHeight * scale)
-
-    const ctx =
-      canvas.getContext("2d")
-
-    ctx.imageSmoothingEnabled = true
-    ctx.imageSmoothingQuality = "high"
-
-    ctx.drawImage(
-      img,
-      0,
-      0,
-      canvas.width,
-      canvas.height
-    )
-
-    return await new Promise(resolve => {
-
-      canvas.toBlob(
-        resolve,
-        "image/jpeg",
-        0.95
-      )
-
-    })
-
-  } finally {
-
-    URL.revokeObjectURL(url)
-
-  }
-}
-
-async function processHDVideo(
-  file,
-  targetHeight = 1080,
-  onProgress = () => {}
-) {
-
-  await loadFFmpeg()
-
-  const inputName = "input-video"
-  const outputName = "output-hd.mp4"
-
-  await ffmpeg.writeFile(
-    inputName,
-    await fetchFile(file)
-  )
-
-  const videoURL =
-    URL.createObjectURL(file)
-
-  const video =
-    document.createElement("video")
-
-  video.src = videoURL
-  video.muted = true
-
-  await new Promise((resolve, reject) => {
-
-    video.onloadedmetadata = resolve
-    video.onerror = reject
-
-  })
-
-  const ratio =
-    video.videoWidth /
-    video.videoHeight
-
-  let height = targetHeight
-
-  let width =
-    Math.round(
-      (height * ratio) / 2
-    ) * 2
-
-  URL.revokeObjectURL(videoURL)
-
-  ffmpeg.on(
-    "progress",
-    ({ progress }) => {
-
-      onProgress(
-        Math.round(progress * 100)
-      )
-
-    }
-  )
-
-  await ffmpeg.exec([
-    "-i",
-    inputName,
-
-    "-vf",
-    `scale=${width}:${height}:flags=lanczos`,
-
-    "-c:v",
-    "libx264",
-
-    "-preset",
-    "veryfast",
-
-    "-crf",
-    "18",
-
-    "-c:a",
-    "aac",
-
-    "-b:a",
-    "192k",
-
-    "-movflags",
-    "+faststart",
-
-    outputName
-  ])
-
-  const data =
-    await ffmpeg.readFile(outputName)
-
-  await ffmpeg.deleteFile(inputName)
-  await ffmpeg.deleteFile(outputName)
-
-  return new Blob(
-    [data.buffer],
-    {
-      type: "video/mp4"
-    }
-  )
-}
 
 // =========================
 // FACEBOOK
@@ -1930,22 +1747,3 @@ document.addEventListener(
     }
   }
 )
-
-document
-  .getElementById("processHDPhoto")
-  ?.addEventListener("click", async () => {
-
-    // event foto
-  })
-
-
-// =========================
-// HD VIDEO
-// =========================
-
-document
-  .getElementById("processHDVideo")
-  ?.addEventListener("click", async () => {
-
-    // event video
-  })
