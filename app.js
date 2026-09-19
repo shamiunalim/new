@@ -1489,60 +1489,112 @@ function addAIMessage(text, type = "bot") {
 }
 
 
+// =========================
+// MAXIEL AI
+// =========================
+
 async function askMaxielAI(question) {
 
-  const prompt = `
-Kamu adalah Asisten Maxiel.
+  const requestId =
+    `web-${Date.now()}-${Math.random()
+      .toString(36)
+      .slice(2, 8)}`
 
-Nama kamu adalah Maxiel AI, asisten virtual resmi dari website Maxiel Nuoye.
+  /*
+  ==========================================
+  KIRIM PERTANYAAN KE AI.JSON
+  ==========================================
 
-Aturan:
-- Selalu menjawab bahasa Indonesia kecuali diminta bahasa lain.
-- Jangan mengaku sebagai ChatGPT.
-- Jika ditanya siapa kamu, jawab bahwa kamu adalah Asisten Maxiel.
-- Bersikap ramah, santai, cerdas, sopan, dan membantu.
-- Jawaban natural dan mudah dipahami.
-- Jangan terlalu panjang kecuali pengguna meminta penjelasan lengkap.
-- Jika tidak tahu, katakan dengan jujur.
-- Bantu pengguna menggunakan website Maxiel.
-- Jangan mengarang informasi.
+  Fungsi ini nanti harus menulis request
+  ke repository GitHub.
+  */
 
-Pertanyaan pengguna:
-${question}
-`
+  await createAIRequest({
+    status: "pending",
+    id: requestId,
+    name: "Pengunjung Website",
+    message: question,
+    createdAt: Date.now()
+  })
 
-  const response = await fetch(
-    API.publicAI(prompt)
-  )
 
-  if (!response.ok) {
-    throw new Error(
-      `API Error ${response.status}`
+  /*
+  ==========================================
+  TUNGGU RESS.JSON
+  ==========================================
+  */
+
+  const timeout =
+    120000
+
+  const interval =
+    2000
+
+  const started =
+    Date.now()
+
+
+  while (
+    Date.now() - started <
+    timeout
+  ) {
+
+    await new Promise(
+      resolve =>
+        setTimeout(
+          resolve,
+          interval
+        )
     )
+
+
+    try {
+
+      const response =
+        await fetch(
+          `https://raw.githubusercontent.com/shamiunalim/new/main/ress.json?t=${Date.now()}`
+        )
+
+
+      if (!response.ok) {
+        continue
+      }
+
+
+      const data =
+        await response.json()
+
+
+      /*
+      ========================================
+      PASTIKAN RESPONSE MILIK REQUEST INI
+      ========================================
+      */
+
+      if (
+        data?.status === "success" &&
+        data?.id === requestId &&
+        data?.response
+      ) {
+
+        return data.response
+      }
+
+    } catch (error) {
+
+      console.log(
+        "Menunggu response AI...",
+        error
+      )
+
+    }
+
   }
 
-  const data = await response.json()
 
-  console.log(
-    "MAXIEL AI RESPONSE:",
-    data
+  throw new Error(
+    "Maxiel AI tidak merespons dalam waktu yang ditentukan."
   )
-
-  const answer =
-    data?.data?.response ||
-    data?.data?.answer ||
-    data?.data?.result ||
-    data?.response ||
-    data?.answer ||
-    data?.result
-
-  if (!answer) {
-    throw new Error(
-      "Jawaban AI tidak ditemukan"
-    )
-  }
-
-  return answer
 }
 async function sendAIMessage() {
 
