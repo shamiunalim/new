@@ -1752,3 +1752,120 @@ document.addEventListener(
     }
   }
 )
+
+
+// =========================================================
+// MAXIEL SETTINGS / THEME
+// =========================================================
+const maxielThemeKey = "maxiel_theme"
+const maxielAccentKey = "maxiel_accent"
+const backgroundVideo = document.getElementById("backgroundVideo")
+const themeStatus = document.getElementById("themeStatus")
+const colorStatus = document.getElementById("colorStatus")
+const accentColor = document.getElementById("accentColor")
+const resetSettings = document.getElementById("resetSettings")
+
+function hexToRgba(hex, alpha = .18) {
+  const value = String(hex).replace("#", "")
+  const full = value.length === 3
+    ? value.split("").map(x => x + x).join("")
+    : value
+  const number = Number.parseInt(full, 16)
+  if (!Number.isFinite(number)) return `rgba(8,124,255,${alpha})`
+  const r = (number >> 16) & 255
+  const g = (number >> 8) & 255
+  const b = number & 255
+  return `rgba(${r},${g},${b},${alpha})`
+}
+
+function applyMaxielAccent(color, save = true) {
+  const safe = /^#[0-9a-fA-F]{6}$/.test(String(color))
+    ? String(color).toLowerCase()
+    : "#087cff"
+
+  document.body.style.setProperty("--accent", safe)
+  document.body.style.setProperty("--accent-soft", hexToRgba(safe, .18))
+
+  if (accentColor) accentColor.value = safe
+  if (colorStatus) colorStatus.textContent = safe.toUpperCase()
+
+  document.querySelectorAll(".color-preset").forEach(button => {
+    button.classList.toggle(
+      "selected",
+      button.dataset.color?.toLowerCase() === safe
+    )
+  })
+
+  if (save) localStorage.setItem(maxielAccentKey, safe)
+}
+
+function applyMaxielTheme(theme, save = true) {
+  const safe = ["blue", "original", "video"].includes(theme)
+    ? theme
+    : "blue"
+
+  document.body.classList.remove(
+    "theme-blue",
+    "theme-original",
+    "theme-video"
+  )
+  document.body.classList.add(`theme-${safe}`)
+
+  if (themeStatus) {
+    themeStatus.textContent =
+      safe === "original"
+        ? "MAXIEL NEW"
+        : safe === "video"
+          ? "VIDEO"
+          : "BLUE"
+  }
+
+  document.querySelectorAll(".theme-option").forEach(button => {
+    button.classList.toggle("selected", button.dataset.theme === safe)
+  })
+
+  if (backgroundVideo) {
+    if (safe === "video") {
+      backgroundVideo.play().catch(() => {})
+    } else {
+      backgroundVideo.pause()
+    }
+  }
+
+  if (save) localStorage.setItem(maxielThemeKey, safe)
+}
+
+document.querySelectorAll(".theme-option").forEach(button => {
+  button.addEventListener("click", () => {
+    applyMaxielTheme(button.dataset.theme)
+    toast(`Background ${button.textContent.trim().split("\n")[0]} diterapkan.`)
+  })
+})
+
+document.querySelectorAll(".color-preset").forEach(button => {
+  button.addEventListener("click", () => {
+    applyMaxielAccent(button.dataset.color)
+    toast(`Warna aksen ${button.dataset.color.toUpperCase()} diterapkan.`)
+  })
+})
+
+accentColor?.addEventListener("input", event => {
+  applyMaxielAccent(event.target.value)
+})
+
+resetSettings?.addEventListener("click", () => {
+  localStorage.removeItem(maxielThemeKey)
+  localStorage.removeItem(maxielAccentKey)
+  applyMaxielTheme("blue", false)
+  applyMaxielAccent("#087cff", false)
+  toast("Pengaturan Maxiel dikembalikan ke default.")
+})
+
+applyMaxielTheme(
+  localStorage.getItem(maxielThemeKey) || "blue",
+  false
+)
+applyMaxielAccent(
+  localStorage.getItem(maxielAccentKey) || "#087cff",
+  false
+)
