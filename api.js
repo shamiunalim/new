@@ -15,10 +15,7 @@ export const API = {
     `${API_BASE}/api/downloader/youtube?key=${API_KEY}&url=${encodeURIComponent(url)}&type=${type}`,
 
   youtubeSearch: (query) =>
-    `${API_BASE}/api/search/youtube?query=${encodeURIComponent(query)}&key=${API_KEY}`,
-
-  publicAI: (query) =>
-    `https://api.fromscratch.web.id/v1/api/ai/publicai?query=${encodeURIComponent(query)}`
+    `${API_BASE}/api/search/youtube?query=${encodeURIComponent(query)}&key=${API_KEY}`
 }
 
 export const TIKTOK_API = "https://www.tikwm.com/api/"
