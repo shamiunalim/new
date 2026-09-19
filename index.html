@@ -71,6 +71,11 @@
   id="bgMusic"
   preload="auto">
 </audio>
+<video id="backgroundVideo" class="background-video" autoplay muted loop playsinline preload="auto">
+  <source src="https://cdn.nekohime.site/file/2091a26w.mp4" type="video/mp4">
+</video>
+<div class="video-overlay"></div>
+
 
 <div class="space"></div>
 <div class="aurora"></div>
@@ -143,6 +148,14 @@
       <div>
         <b>Developer</b>
         <small>Maxiel Nuoye ོ</small>
+      </div>
+    </button>
+
+    <button class="nav-item" data-page="settings">
+      <span>⚙</span>
+      <div>
+        <b>Pengaturan</b>
+        <small>Tampilan & warna</small>
       </div>
     </button>
 
@@ -249,6 +262,88 @@
 
 </section>
 
+
+<!-- ================= SETTINGS ================= -->
+
+<section class="page" id="settings">
+
+  <div class="page-header settings-heading">
+    <div>
+      <small>PENGATURAN</small>
+      <h2>Tampilan Maxiel</h2>
+      <p>Atur background dan warna antarmuka. Pilihan disimpan otomatis di browser.</p>
+    </div>
+  </div>
+
+  <div class="settings-grid">
+    <div class="settings-card">
+      <div class="settings-card-head">
+        <div>
+          <small>BACKGROUND</small>
+          <h3>Gaya Dashboard</h3>
+        </div>
+        <span class="settings-badge" id="themeStatus">BLUE</span>
+      </div>
+
+      <div class="theme-options">
+        <button class="theme-option" type="button" data-theme="blue">
+          <span class="theme-preview preview-blue"></span>
+          <strong>Blue Dashboard</strong>
+          <small>Navy biru seperti tampilan sekarang</small>
+        </button>
+
+        <button class="theme-option" type="button" data-theme="original">
+          <span class="theme-preview preview-original"></span>
+          <strong>Maxiel Nuoye New</strong>
+          <small>Background dashboard Maxiel Nuoye New</small>
+        </button>
+
+        <button class="theme-option" type="button" data-theme="video">
+          <span class="theme-preview preview-video"></span>
+          <strong>Video Background</strong>
+          <small>Video bergerak sebagai background</small>
+        </button>
+      </div>
+    </div>
+
+    <div class="settings-card">
+      <div class="settings-card-head">
+        <div>
+          <small>WARNA AKSEN</small>
+          <h3>Warna Menu Aktif</h3>
+        </div>
+        <span class="settings-badge" id="colorStatus">#087CFF</span>
+      </div>
+
+      <div class="color-row">
+        <input id="accentColor" type="color" value="#087cff" aria-label="Pilih warna aksen">
+        <div>
+          <strong>Pilih warna sendiri</strong>
+          <small>Dipakai pada menu aktif, tombol dan glow.</small>
+        </div>
+      </div>
+
+      <div class="color-presets">
+        <button type="button" class="color-preset" data-color="#087cff" style="--preset:#087cff" aria-label="Biru"></button>
+        <button type="button" class="color-preset" data-color="#00c8ff" style="--preset:#00c8ff" aria-label="Cyan"></button>
+        <button type="button" class="color-preset" data-color="#7b2cff" style="--preset:#7b2cff" aria-label="Ungu"></button>
+        <button type="button" class="color-preset" data-color="#ff1493" style="--preset:#ff1493" aria-label="Pink"></button>
+        <button type="button" class="color-preset" data-color="#00d084" style="--preset:#00d084" aria-label="Hijau"></button>
+        <button type="button" class="color-preset" data-color="#ff8a00" style="--preset:#ff8a00" aria-label="Oranye"></button>
+      </div>
+    </div>
+
+    <div class="settings-card settings-reset-card">
+      <div>
+        <small>DEFAULT</small>
+        <h3>Kembalikan Pengaturan</h3>
+        <p>Reset background ke Blue Dashboard dan warna ke biru standar.</p>
+      </div>
+      <button type="button" id="resetSettings" class="settings-reset">Reset Pengaturan</button>
+    </div>
+  </div>
+
+</section>
 
 <!-- ================= DOWNLOADER ================= -->
 
