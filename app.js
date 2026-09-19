@@ -1490,111 +1490,248 @@ function addAIMessage(text, type = "bot") {
 
 
 // =========================
-// MAXIEL AI
+// MAXIEL AI - REQUEST QUEUE
 // =========================
 
-async function askMaxielAI(question) {
-
-  const requestId =
-    `web-${Date.now()}-${Math.random()
-      .toString(36)
-      .slice(2, 8)}`
-
-  /*
-  ==========================================
-  KIRIM PERTANYAAN KE AI.JSON
-  ==========================================
-
-  Fungsi ini nanti harus menulis request
-  ke repository GitHub.
-  */
-
-  await createAIRequest({
-    status: "pending",
-    id: requestId,
-    name: "Pengunjung Website",
-    message: question,
-    createdAt: Date.now()
-  })
+const AI_POLL_INTERVAL = 2000
+const AI_TIMEOUT = 60000
 
 
-  /*
-  ==========================================
-  TUNGGU RESS.JSON
-  ==========================================
-  */
+// =========================
+// BUAT ID REQUEST UNIK
+// =========================
 
-  const timeout =
-    120000
+function createRequestId() {
 
-  const interval =
-    2000
+  const timestamp =
+    Date.now().toString(36)
 
-  const started =
+  const random =
+    crypto.randomUUID
+      ? crypto.randomUUID()
+      : Math.random()
+          .toString(36)
+          .slice(2)
+
+  return `maxiel-${timestamp}-${random}`
+}
+
+
+// =========================
+// KIRIM REQUEST KE AI.JSON
+// =========================
+
+async function sendAIRequest(id, prompt) {
+
+  const response = await fetch(
+    API.aiRequest(),
+    {
+      method: "POST",
+
+      headers: {
+        "content-type":
+          "application/json"
+      },
+
+      body: JSON.stringify({
+        id,
+        prompt,
+        createdAt: Date.now()
+      })
+    }
+  )
+
+  if (!response.ok) {
+
+    throw new Error(
+      `Gagal mengirim request (${response.status})`
+    )
+
+  }
+
+  const data =
+    await response.json()
+
+  if (data?.status === false) {
+
+    throw new Error(
+      data?.message ||
+      "Request AI ditolak."
+    )
+
+  }
+
+  return data
+}
+
+
+// =========================
+// AMBIL RESS.JSON
+// =========================
+
+async function getAIResponse() {
+
+  const response = await fetch(
+    API.aiResponse() +
+    `?t=${Date.now()}`,
+    {
+      cache: "no-store"
+    }
+  )
+
+  if (!response.ok) {
+
+    throw new Error(
+      `Gagal membaca ress.json (${response.status})`
+    )
+
+  }
+
+  return await response.json()
+}
+
+
+// =========================
+// POLLING RESS.JSON
+// =========================
+
+async function waitForAIResponse(requestId) {
+
+  const start =
     Date.now()
 
-
   while (
-    Date.now() - started <
-    timeout
+    Date.now() - start <
+    AI_TIMEOUT
   ) {
+
+    try {
+
+      const data =
+        await getAIResponse()
+
+      /*
+       * Bisa menangani beberapa bentuk:
+       *
+       * { id, response }
+       *
+       * atau
+       *
+       * { data: { id, response } }
+       */
+
+      const result =
+        data?.data ||
+        data?.result ||
+        data
+
+      const responseId =
+        result?.id
+
+      const answer =
+        result?.response ||
+        result?.answer ||
+        result?.result
+
+      // =========================
+      // CEK ID
+      // =========================
+
+      if (
+        responseId === requestId &&
+        answer
+      ) {
+
+        return answer
+
+      }
+
+    } catch (error) {
+
+      console.warn(
+        "Polling AI:",
+        error.message
+      )
+
+    }
+
+    // =========================
+    // TUNGGU
+    // =========================
 
     await new Promise(
       resolve =>
         setTimeout(
           resolve,
-          interval
+          AI_POLL_INTERVAL
         )
     )
 
-
-    try {
-
-      const response =
-        await fetch(
-          `https://raw.githubusercontent.com/shamiunalim/new/main/ress.json?t=${Date.now()}`
-        )
-
-
-      if (!response.ok) {
-        continue
-      }
-
-
-      const data =
-        await response.json()
-
-
-      /*
-      ========================================
-      PASTIKAN RESPONSE MILIK REQUEST INI
-      ========================================
-      */
-
-      if (
-        data?.status === "success" &&
-        data?.id === requestId &&
-        data?.response
-      ) {
-
-        return data.response
-      }
-
-    } catch (error) {
-
-      console.log(
-        "Menunggu response AI...",
-        error
-      )
-
-    }
-
   }
 
-
   throw new Error(
-    "Maxiel AI tidak merespons dalam waktu yang ditentukan."
+    "Maxiel AI tidak memberikan jawaban dalam waktu yang ditentukan."
   )
+}
+
+
+// =========================
+// ASK MAXIEL AI
+// =========================
+
+async function askMaxielAI(question) {
+
+  const prompt = `
+Kamu adalah Asisten Maxiel.
+
+Nama kamu adalah Maxiel AI, asisten virtual resmi dari website Maxiel Nuoye.
+
+Aturan:
+- Selalu menjawab bahasa Indonesia kecuali diminta bahasa lain.
+- Jangan mengaku sebagai ChatGPT.
+- Jika ditanya siapa kamu, jawab bahwa kamu adalah Asisten Maxiel.
+- Bersikap ramah, santai, cerdas, sopan, dan membantu.
+- Jawaban natural dan mudah dipahami.
+- Jangan terlalu panjang kecuali pengguna meminta penjelasan lengkap.
+- Jika tidak tahu, katakan dengan jujur.
+- Bantu pengguna menggunakan website Maxiel.
+- Jangan mengarang informasi.
+
+Pertanyaan pengguna:
+${question}
+`
+
+  // =========================
+  // ID UNIK
+  // =========================
+
+  const requestId =
+    createRequestId()
+
+  console.log(
+    "MAXIEL REQUEST ID:",
+    requestId
+  )
+
+  // =========================
+  // MASUKKAN KE AI.JSON
+  // =========================
+
+  await sendAIRequest(
+    requestId,
+    prompt
+  )
+
+  // =========================
+  // TUNGGU RESS.JSON
+  // =========================
+
+  const answer =
+    await waitForAIResponse(
+      requestId
+    )
+
+  return answer
 }
 async function sendAIMessage() {
 
