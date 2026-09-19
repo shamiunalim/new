@@ -98,6 +98,11 @@ function updateClock() {
 
   document.getElementById("clock").textContent = time
   document.getElementById("date").textContent = date
+
+  const dashboardTime = document.getElementById("dashboardTime")
+  if (dashboardTime) {
+    dashboardTime.textContent = time.replaceAll(":", ".")
+  }
 }
 
 updateClock()
