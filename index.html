@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="theme-color" content="#000000">
+<meta name="theme-color" content="#020817">
 <meta name="description" content="Maxiel Nuoye ོ - Downloader, Converter & Tools">
 <title>Maxiel Nuoye ོ</title>
 <link rel="stylesheet" href="style.css">
@@ -81,8 +81,11 @@
   <button class="menu-btn" id="menuBtn">☰</button>
 
   <div class="brand">
-    <span>Maxiel</span>
-    <span>Nuoye ོ</span>
+    <div class="brand-mark">M</div>
+    <div class="brand-text">
+      <strong>MAXIEL</strong>
+      <small>Web Dashboard</small>
+    </div>
   </div>
 
   <div class="online">
@@ -158,37 +161,33 @@
 
 <section class="page active" id="dashboard">
 
-  <div class="hero">
-
-    <div class="hero-title">
-      <div class="hero-name">
-        <span>Maxiel</span>
-        <span>Nuoye ོ</span>
-      </div>
-
-      <div class="hero-line"></div>
-
-      <p>
-        Downloader, Converter & Tools
-      </p>
-    </div>
-
-    <div class="hero-description">
-      Website pribadi untuk berbagai kebutuhan downloader,
-      converter dan tools sederhana dalam satu tempat.
-    </div>
-
+  <div class="dashboard-heading">
+    <div><span>MAXIEL</span><b>/</b><strong>Dashboard</strong></div>
+    <time id="dashboardTime">00.00.00</time>
   </div>
+
+  <div class="hero dashboard-hero">
+    <div class="hero-title">
+      <small>MAXIEL WEB</small>
+      <h1>Halo, Pengguna 👋</h1>
+      <p>Selamat datang di Maxiel Web Dashboard. Pantau waktu, runtime dan informasi perangkat langsung dari browser.</p>
+    </div>
+    <div class="hero-actions">
+      <button type="button" onclick="document.getElementById('clockCard').scrollIntoView({behavior:'smooth',block:'center'})">◷ <span>Lihat Runtime</span></button>
+      <button type="button" onclick="document.getElementById('featureCard').scrollIntoView({behavior:'smooth',block:'center'})">◇ <span>Informasi Sistem</span></button>
+    </div>
+  </div>
+
 
   <div class="dashboard-grid">
 
-    <div class="dashboard-card clock-card">
+    <div class="dashboard-card clock-card" id="clockCard">
       <small>WAKTU SEKARANG</small>
       <strong id="clock">00:00:00</strong>
       <span id="date">Memuat tanggal...</span>
     </div>
 
-    <div class="dashboard-card">
+    <div class="dashboard-card" id="featureCard">
       <small>FITUR TERSEDIA</small>
       <strong id="featureCount">12+</strong>
       <span>Downloader, Converter & Tools</span>
