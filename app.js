@@ -1,5 +1,6 @@
 import { API, TIKTOK_API } from "./api.js"
-
+import { FFmpeg } from "https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.15/dist/esm/index.js"
+import { fetchFile, toBlobURL } from "https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.2/dist/esm/index.js"
 const pages = document.querySelectorAll(".page")
 const navItems = document.querySelectorAll(".nav-item")
 const sidebar = document.getElementById("sidebar")
@@ -15,7 +16,33 @@ const downloadResult = document.getElementById("downloadResult")
 let currentPlatform = "tiktok"
 let currentType = "video"
 
+let ffmpeg = null
+let ffmpegLoaded = false
+async function loadFFmpeg() {
+  if (ffmpegLoaded) return
 
+  ffmpeg = new FFmpeg()
+
+  const baseURL =
+    "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm"
+
+  await ffmpeg.load({
+    coreURL: await toBlobURL(
+      `${baseURL}/ffmpeg-core.js`,
+      "text/javascript"
+    ),
+    wasmURL: await toBlobURL(
+      `${baseURL}/ffmpeg-core.wasm`,
+      "application/wasm"
+    ),
+    workerURL: await toBlobURL(
+      `${baseURL}/ffmpeg-core.worker.js`,
+      "text/javascript"
+    )
+  })
+
+  ffmpegLoaded = true
+}
 // =========================
 // NAVIGATION
 // =========================
@@ -288,6 +315,162 @@ async function downloadMedia() {
   }
 }
 
+
+
+
+
+// =========================
+// HD FOTO
+// =========================
+
+async function processHDPhoto(file, scale = 2) {
+
+  const url = URL.createObjectURL(file)
+
+  try {
+
+    const img = new Image()
+
+    img.src = url
+
+    await img.decode()
+
+    const canvas = document.createElement("canvas")
+
+    canvas.width =
+      Math.round(img.naturalWidth * scale)
+
+    canvas.height =
+      Math.round(img.naturalHeight * scale)
+
+    const ctx =
+      canvas.getContext("2d")
+
+    ctx.imageSmoothingEnabled = true
+    ctx.imageSmoothingQuality = "high"
+
+    ctx.drawImage(
+      img,
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    )
+
+    return await new Promise(resolve => {
+
+      canvas.toBlob(
+        resolve,
+        "image/jpeg",
+        0.95
+      )
+
+    })
+
+  } finally {
+
+    URL.revokeObjectURL(url)
+
+  }
+}
+
+async function processHDVideo(
+  file,
+  targetHeight = 1080,
+  onProgress = () => {}
+) {
+
+  await loadFFmpeg()
+
+  const inputName = "input-video"
+  const outputName = "output-hd.mp4"
+
+  await ffmpeg.writeFile(
+    inputName,
+    await fetchFile(file)
+  )
+
+  const videoURL =
+    URL.createObjectURL(file)
+
+  const video =
+    document.createElement("video")
+
+  video.src = videoURL
+  video.muted = true
+
+  await new Promise((resolve, reject) => {
+
+    video.onloadedmetadata = resolve
+    video.onerror = reject
+
+  })
+
+  const ratio =
+    video.videoWidth /
+    video.videoHeight
+
+  let height = targetHeight
+
+  let width =
+    Math.round(
+      (height * ratio) / 2
+    ) * 2
+
+  URL.revokeObjectURL(videoURL)
+
+  ffmpeg.on(
+    "progress",
+    ({ progress }) => {
+
+      onProgress(
+        Math.round(progress * 100)
+      )
+
+    }
+  )
+
+  await ffmpeg.exec([
+    "-i",
+    inputName,
+
+    "-vf",
+    `scale=${width}:${height}:flags=lanczos`,
+
+    "-c:v",
+    "libx264",
+
+    "-preset",
+    "veryfast",
+
+    "-crf",
+    "18",
+
+    "-c:a",
+    "aac",
+
+    "-b:a",
+    "192k",
+
+    "-movflags",
+    "+faststart",
+
+    outputName
+  ])
+
+  const data =
+    await ffmpeg.readFile(outputName)
+
+  await ffmpeg.deleteFile(inputName)
+  await ffmpeg.deleteFile(outputName)
+
+  return new Blob(
+    [data.buffer],
+    {
+      type: "video/mp4"
+    }
+  )
+}
 
 // =========================
 // FACEBOOK
@@ -1748,439 +1931,21 @@ document.addEventListener(
   }
 )
 
+document
+  .getElementById("processHDPhoto")
+  ?.addEventListener("click", async () => {
+
+    // event foto
+  })
+
 
 // =========================
-// HD FOTO & VIDEO
+// HD VIDEO
 // =========================
 
-const hdTabs = document.querySelectorAll(".hd-tab")
-const hdPanels = {
-  photo: document.getElementById("hdPhotoPanel"),
-  video: document.getElementById("hdVideoPanel")
-}
+document
+  .getElementById("processHDVideo")
+  ?.addEventListener("click", async () => {
 
-hdTabs.forEach(tab => {
-  tab.addEventListener("click", () => {
-    const type = tab.dataset.hdTab
-
-    hdTabs.forEach(item => {
-      item.classList.toggle("active", item === tab)
-    })
-
-    Object.entries(hdPanels).forEach(([key, panel]) => {
-      panel.classList.toggle("active", key === type)
-    })
+    // event video
   })
-})
-
-const hdPhotoInput = document.getElementById("hdPhotoInput")
-const hdPhotoName = document.getElementById("hdPhotoName")
-const hdPhotoProcess = document.getElementById("hdPhotoProcess")
-const hdPhotoScale = document.getElementById("hdPhotoScale")
-const hdPhotoQuality = document.getElementById("hdPhotoQuality")
-const hdPhotoPreview = document.getElementById("hdPhotoPreview")
-const hdPhotoResult = document.getElementById("hdPhotoResult")
-
-let hdPhotoFile = null
-
-hdPhotoInput?.addEventListener("change", () => {
-  hdPhotoFile = hdPhotoInput.files?.[0] || null
-
-  if (!hdPhotoFile) {
-    hdPhotoName.textContent = "Belum ada foto"
-    hdPhotoProcess.disabled = true
-    return
-  }
-
-  hdPhotoName.textContent = `${hdPhotoFile.name} • ${formatBytes(hdPhotoFile.size)}`
-  hdPhotoProcess.disabled = false
-
-  const url = URL.createObjectURL(hdPhotoFile)
-  hdPhotoPreview.innerHTML = `<img src="${url}" alt="Preview foto">`
-})
-
-hdPhotoProcess?.addEventListener("click", async () => {
-  if (!hdPhotoFile) return
-
-  hdPhotoProcess.disabled = true
-  hdPhotoProcess.textContent = "MEMPROSES..."
-
-  try {
-    const image = await loadImage(hdPhotoFile)
-    const scale = Number(hdPhotoScale.value)
-    const quality = Number(hdPhotoQuality.value)
-
-    const width = Math.max(1, Math.round(image.naturalWidth * scale))
-    const height = Math.max(1, Math.round(image.naturalHeight * scale))
-
-    // Batasi canvas untuk mencegah browser/HP crash.
-    const maxPixels = 30000000
-    const pixelCount = width * height
-
-    let finalWidth = width
-    let finalHeight = height
-
-    if (pixelCount > maxPixels) {
-      const factor = Math.sqrt(maxPixels / pixelCount)
-      finalWidth = Math.max(1, Math.floor(width * factor))
-      finalHeight = Math.max(1, Math.floor(height * factor))
-    }
-
-    const canvas = document.createElement("canvas")
-    canvas.width = finalWidth
-    canvas.height = finalHeight
-
-    const ctx = canvas.getContext("2d", {
-      alpha: true
-    })
-
-    ctx.imageSmoothingEnabled = true
-    ctx.imageSmoothingQuality = "high"
-    ctx.drawImage(image, 0, 0, finalWidth, finalHeight)
-
-    const blob = await new Promise(resolve => {
-      canvas.toBlob(resolve, "image/jpeg", quality)
-    })
-
-    if (!blob) throw new Error("Gagal membuat gambar HD.")
-
-    const outputName =
-      hdPhotoFile.name.replace(/\.[^.]+$/, "") +
-      "-HD.jpg"
-
-    const url = URL.createObjectURL(blob)
-
-    hdPhotoResult.innerHTML = `
-      <div class="hd-result-card">
-        <div class="hd-result-info">
-          <strong>${escapeHTML(outputName)}</strong>
-          <small>${finalWidth}×${finalHeight} • ${formatBytes(blob.size)}</small>
-        </div>
-        <a class="hd-download" href="${url}" download="${escapeHTML(outputName)}">
-          DOWNLOAD
-        </a>
-      </div>
-    `
-
-    hdPhotoPreview.innerHTML = `<img src="${url}" alt="Hasil foto HD">`
-  } catch (error) {
-    hdPhotoResult.innerHTML = `
-      <div class="error-box">
-        ${escapeHTML(error.message || "Gagal memproses foto.")}
-      </div>
-    `
-  } finally {
-    hdPhotoProcess.disabled = false
-    hdPhotoProcess.textContent = "PROSES FOTO HD"
-  }
-})
-
-const hdVideoInput = document.getElementById("hdVideoInput")
-const hdVideoName = document.getElementById("hdVideoName")
-const hdVideoProcess = document.getElementById("hdVideoProcess")
-const hdVideoResolution = document.getElementById("hdVideoResolution")
-const hdVideoBitrate = document.getElementById("hdVideoBitrate")
-const hdVideoSource = document.getElementById("hdVideoSource")
-const hdVideoProgress = document.getElementById("hdVideoProgress")
-const hdVideoProgressBar = document.getElementById("hdVideoProgressBar")
-const hdVideoProgressText = document.getElementById("hdVideoProgressText")
-const hdVideoResult = document.getElementById("hdVideoResult")
-
-let hdVideoFile = null
-let hdVideoUrl = null
-
-hdVideoInput?.addEventListener("change", () => {
-  hdVideoFile = hdVideoInput.files?.[0] || null
-
-  if (hdVideoUrl) {
-    URL.revokeObjectURL(hdVideoUrl)
-    hdVideoUrl = null
-  }
-
-  if (!hdVideoFile) {
-    hdVideoName.textContent = "Belum ada video"
-    hdVideoProcess.disabled = true
-    hdVideoSource.removeAttribute("src")
-    hdVideoSource.load()
-    return
-  }
-
-  hdVideoName.textContent =
-    `${hdVideoFile.name} • ${formatBytes(hdVideoFile.size)}`
-
-  hdVideoUrl = URL.createObjectURL(hdVideoFile)
-  hdVideoSource.src = hdVideoUrl
-  hdVideoSource.load()
-  hdVideoProcess.disabled = false
-  hdVideoResult.innerHTML = ""
-})
-
-hdVideoProcess?.addEventListener("click", async () => {
-  if (!hdVideoFile) return
-
-  if (!window.MediaRecorder) {
-    hdVideoResult.innerHTML = `
-      <div class="error-box">
-        Browser ini tidak mendukung MediaRecorder untuk pemrosesan video.
-      </div>
-    `
-    return
-  }
-
-  hdVideoProcess.disabled = true
-  hdVideoProcess.textContent = "MEMPROSES..."
-  hdVideoProgress.style.display = "block"
-  hdVideoProgressBar.style.width = "0%"
-  hdVideoProgressText.textContent = "0%"
-
-  try {
-    await processHDVideo()
-  } catch (error) {
-    console.error(error)
-
-    hdVideoResult.innerHTML = `
-      <div class="error-box">
-        ${escapeHTML(error.message || "Gagal memproses video.")}
-      </div>
-    `
-  } finally {
-    hdVideoProcess.disabled = false
-    hdVideoProcess.textContent = "PROSES VIDEO HD"
-  }
-})
-
-async function processHDVideo() {
-  const video = hdVideoSource
-
-  if (!video.videoWidth || !video.videoHeight) {
-    await new Promise((resolve, reject) => {
-      const timer = setTimeout(
-        () => reject(new Error("Video tidak dapat dibaca.")),
-        10000
-      )
-
-      video.addEventListener("loadedmetadata", () => {
-        clearTimeout(timer)
-        resolve()
-      }, { once: true })
-
-      video.load()
-    })
-  }
-
-  const targetHeight = Number(hdVideoResolution.value)
-  const sourceWidth = video.videoWidth
-  const sourceHeight = video.videoHeight
-
-  const ratio = sourceWidth / sourceHeight
-
-  let targetWidth = Math.round(targetHeight * ratio)
-
-  // Encoder browser umumnya lebih aman dengan dimensi genap.
-  targetWidth -= targetWidth % 2
-
-  const canvas = document.createElement("canvas")
-  canvas.width = Math.max(2, targetWidth)
-  canvas.height = Math.max(2, targetHeight)
-
-  const ctx = canvas.getContext("2d")
-  ctx.imageSmoothingEnabled = true
-  ctx.imageSmoothingQuality = "high"
-
-  const canvasStream = canvas.captureStream(30)
-
-  // Ambil audio asli dari video bila browser menyediakannya.
-  let sourceStream = null
-
-  try {
-    sourceStream = video.captureStream
-      ? video.captureStream()
-      : video.mozCaptureStream?.()
-  } catch {}
-
-  if (sourceStream) {
-    sourceStream.getAudioTracks().forEach(track => {
-      canvasStream.addTrack(track)
-    })
-  }
-
-  const mimeTypes = [
-    "video/webm;codecs=vp9,opus",
-    "video/webm;codecs=vp8,opus",
-    "video/webm"
-  ]
-
-  const mimeType =
-    mimeTypes.find(type => MediaRecorder.isTypeSupported(type)) || ""
-
-  if (!mimeType) {
-    throw new Error("Browser tidak mendukung format video yang diperlukan.")
-  }
-
-  const chunks = []
-
-  const recorder = new MediaRecorder(
-    canvasStream,
-    {
-      mimeType,
-      videoBitsPerSecond: Number(hdVideoBitrate.value)
-    }
-  )
-
-  recorder.ondataavailable = event => {
-    if (event.data?.size) chunks.push(event.data)
-  }
-
-  const finished = new Promise((resolve, reject) => {
-    recorder.onstop = resolve
-    recorder.onerror = event => {
-      reject(
-        event.error ||
-        new Error("MediaRecorder gagal.")
-      )
-    }
-  })
-
-  // Mulai dari awal.
-  video.pause()
-  video.currentTime = 0
-
-  await new Promise((resolve, reject) => {
-    const ready = () => {
-      video.removeEventListener("canplay", ready)
-      resolve()
-    }
-
-    if (video.readyState >= 3) {
-      resolve()
-    } else {
-      video.addEventListener("canplay", ready, { once: true })
-      setTimeout(
-        () => reject(new Error("Video terlalu lama untuk dimuat.")),
-        10000
-      )
-    }
-  })
-
-  recorder.start(250)
-
-  const drawFrame = () => {
-    if (video.paused || video.ended) return
-
-    ctx.drawImage(
-      video,
-      0,
-      0,
-      canvas.width,
-      canvas.height
-    )
-
-    const duration = video.duration || 1
-    const percent =
-      Math.min(100, Math.round(
-        (video.currentTime / duration) * 100
-      ))
-
-    hdVideoProgressBar.style.width = `${percent}%`
-    hdVideoProgressText.textContent = `${percent}%`
-
-    requestAnimationFrame(drawFrame)
-  }
-
-  const ended = new Promise(resolve => {
-    video.addEventListener("ended", resolve, { once: true })
-  })
-
-  video.play().then(drawFrame).catch(() => {
-    recorder.stop()
-    throw new Error("Video tidak dapat diputar untuk diproses.")
-  })
-
-  await ended
-
-  // Pastikan frame terakhir ikut dirender.
-  ctx.drawImage(
-    video,
-    0,
-    0,
-    canvas.width,
-    canvas.height
-  )
-
-  recorder.stop()
-  await finished
-
-  canvasStream.getTracks().forEach(track => track.stop())
-
-  const blob = new Blob(
-    chunks,
-    { type: mimeType }
-  )
-
-  if (!blob.size) {
-    throw new Error("Hasil video kosong.")
-  }
-
-  hdVideoProgressBar.style.width = "100%"
-  hdVideoProgressText.textContent = "100%"
-
-  const outputName =
-    hdVideoFile.name.replace(/\.[^.]+$/, "") +
-    `-${targetHeight}p-HD.webm`
-
-  const url = URL.createObjectURL(blob)
-
-  hdVideoResult.innerHTML = `
-    <div class="hd-result-card">
-      <div class="hd-result-info">
-        <strong>${escapeHTML(outputName)}</strong>
-        <small>${canvas.width}×${canvas.height} • ${formatBytes(blob.size)}</small>
-      </div>
-      <a class="hd-download" href="${url}" download="${escapeHTML(outputName)}">
-        DOWNLOAD
-      </a>
-    </div>
-  `
-}
-
-function loadImage(file) {
-  return new Promise((resolve, reject) => {
-    const url = URL.createObjectURL(file)
-    const image = new Image()
-
-    image.onload = () => {
-      URL.revokeObjectURL(url)
-      resolve(image)
-    }
-
-    image.onerror = () => {
-      URL.revokeObjectURL(url)
-      reject(new Error("Foto tidak dapat dibaca."))
-    }
-
-    image.src = url
-  })
-}
-
-function formatBytes(bytes) {
-  if (!Number.isFinite(bytes) || bytes <= 0) return "0 B"
-
-  const units = ["B", "KB", "MB", "GB"]
-  const index = Math.min(
-    Math.floor(Math.log(bytes) / Math.log(1024)),
-    units.length - 1
-  )
-
-  return `${(bytes / Math.pow(1024, index)).toFixed(
-    index ? 2 : 0
-  )} ${units[index]}`
-}
-
-function escapeHTML(value) {
-  return String(value)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;")
-}
