@@ -135,13 +135,13 @@
       </div>
     </button>
 
-    <button class="nav-item" data-page="hd">
-      <span>HD</span>
-      <div>
-        <b>HD Foto & Video</b>
-        <small>Optimasi media</small>
-      </div>
-    </button>
+<button class="nav-item" data-page="hd-media">
+  <span>✦</span>
+  <div>
+    <b>HD Foto & Video</b>
+    <small>Media enhancer</small>
+  </div>
+</button>
 
     <button class="nav-item" data-page="developer">
       <span>♟</span>
@@ -198,7 +198,7 @@
 
     <div class="dashboard-card">
       <small>FITUR TERSEDIA</small>
-      <strong id="featureCount">13+</strong>
+      <strong id="featureCount">12+</strong>
       <span>Downloader, Converter & Tools</span>
     </div>
 
@@ -226,6 +226,13 @@
       <span>BUKA FITUR →</span>
     </button>
 
+<button class="service-card" type="button" data-page-open="hd-media">
+  <div class="service-icon">✦</div>
+  <h3>HD Foto & Video</h3>
+  <p>Optimasi kualitas foto dan video langsung di browser.</p>
+  <span>BUKA FITUR →</span>
+</button>
+
     <button class="service-card" data-open="converter">
       <div class="service-icon">⇄</div>
       <h3>Converter</h3>
@@ -245,13 +252,6 @@
       <h3>Developer</h3>
       <p>Informasi mengenai developer Maxiel Nuoye ོ.</p>
       <span>LIHAT PROFIL →</span>
-    </button>
-
-    <button class="service-card" data-open="hd">
-      <div class="service-icon">HD</div>
-      <h3>HD Foto & Video</h3>
-      <p>Optimasi foto dan video langsung di perangkat tanpa API key.</p>
-      <span>BUKA FITUR →</span>
     </button>
 
     <button class="service-card report-service-card" type="button" data-report="developer">
@@ -554,123 +554,97 @@
 
 </section>
 
-
-
 <!-- ================= HD FOTO & VIDEO ================= -->
 
-<section class="page" id="hd">
+<section class="page" id="hd-media">
 
   <div class="page-header">
-    <small>HD MEDIA</small>
+    <small>MEDIA ENHANCER</small>
     <h1>HD Foto & Video</h1>
-    <p>Optimasi resolusi media langsung di browser tanpa API key.</p>
+    <p>Tingkatkan resolusi media langsung dari perangkat.</p>
   </div>
 
-  <div class="hd-tabs">
-    <button class="hd-tab active" data-hd-tab="photo">🖼️ Foto</button>
-    <button class="hd-tab" data-hd-tab="video">🎥 Video</button>
-  </div>
+  <div class="hd-grid">
 
-  <div class="hd-panel active" id="hdPhotoPanel">
-    <div class="hd-upload">
-      <div class="hd-upload-icon">🖼️</div>
-      <h3>Pilih Foto</h3>
-      <p>JPG, PNG, WEBP, GIF dan format gambar yang didukung browser.</p>
-      <label class="hd-file-btn">
-        PILIH FOTO
-        <input id="hdPhotoInput" type="file" accept="image/*">
-      </label>
-      <span class="hd-file-name" id="hdPhotoName">Belum ada foto</span>
+    <div class="tool-card hd-card">
+      <div class="tool-icon">▣</div>
+
+      <h3>HD Foto</h3>
+      <p>Upscale foto tanpa API.</p>
+
+      <input
+        type="file"
+        id="hdImageInput"
+        accept="image/*"
+      >
+
+      <select id="hdImageScale">
+        <option value="1.5">1.5×</option>
+        <option value="2">2×</option>
+        <option value="3">3×</option>
+        <option value="4">4×</option>
+      </select>
+
+      <select id="hdImageFormat">
+        <option value="image/jpeg">JPG</option>
+        <option value="image/webp">WEBP</option>
+        <option value="image/png">PNG</option>
+      </select>
+
+      <div id="hdImagePreview"></div>
+
+      <button id="hdImageProcess" type="button">
+        PROSES FOTO
+      </button>
+
+      <a
+        id="hdImageDownload"
+        class="download-btn"
+        hidden
+      >
+        DOWNLOAD FOTO
+      </a>
     </div>
 
-    <div class="hd-controls">
-      <label>
-        Resolusi
-        <select id="hdPhotoScale">
-          <option value="1">Asli</option>
-          <option value="1.5">1.5×</option>
-          <option value="2" selected>2×</option>
-          <option value="3">3×</option>
-          <option value="4">4×</option>
-        </select>
-      </label>
+    <div class="tool-card hd-card">
+      <div class="tool-icon">▶</div>
 
-      <label>
-        Kualitas
-        <select id="hdPhotoQuality">
-          <option value="0.92">Tinggi</option>
-          <option value="0.97" selected>Sangat Tinggi</option>
-          <option value="1">Maksimal</option>
-        </select>
-      </label>
+      <h3>HD Video</h3>
+      <p>Upscale video langsung di browser.</p>
 
-      <button class="hd-action" id="hdPhotoProcess" disabled>PROSES FOTO HD</button>
+      <input
+        type="file"
+        id="hdVideoInput"
+        accept="video/*"
+      >
+
+      <select id="hdVideoResolution">
+        <option value="720">720p</option>
+        <option value="1080">1080p</option>
+        <option value="1440">1440p</option>
+        <option value="2160">4K</option>
+      </select>
+
+      <div id="hdVideoPreview"></div>
+
+      <div id="hdVideoProgress"></div>
+
+      <button id="hdVideoProcess" type="button">
+        PROSES VIDEO
+      </button>
+
+      <a
+        id="hdVideoDownload"
+        class="download-btn"
+        hidden
+      >
+        DOWNLOAD VIDEO
+      </a>
     </div>
 
-    <div class="hd-preview" id="hdPhotoPreview">
-      <div class="hd-empty">Hasil foto akan muncul di sini.</div>
-    </div>
-
-    <div class="hd-result" id="hdPhotoResult"></div>
-  </div>
-
-  <div class="hd-panel" id="hdVideoPanel">
-    <div class="hd-upload">
-      <div class="hd-upload-icon">🎥</div>
-      <h3>Pilih Video</h3>
-      <p>Proses dilakukan di perangkat. Video besar membutuhkan RAM dan waktu lebih banyak.</p>
-      <label class="hd-file-btn">
-        PILIH VIDEO
-        <input id="hdVideoInput" type="file" accept="video/*">
-      </label>
-      <span class="hd-file-name" id="hdVideoName">Belum ada video</span>
-    </div>
-
-    <div class="hd-controls">
-      <label>
-        Resolusi output
-        <select id="hdVideoResolution">
-          <option value="720">720p</option>
-          <option value="1080" selected>1080p</option>
-          <option value="1440">1440p</option>
-          <option value="2160">4K</option>
-        </select>
-      </label>
-
-      <label>
-        Kualitas
-        <select id="hdVideoBitrate">
-          <option value="2500000">Hemat</option>
-          <option value="5000000" selected>Tinggi</option>
-          <option value="8000000">Sangat Tinggi</option>
-        </select>
-      </label>
-
-      <button class="hd-action" id="hdVideoProcess" disabled>PROSES VIDEO HD</button>
-    </div>
-
-    <video id="hdVideoSource" class="hd-source-video" controls playsinline></video>
-
-    <div class="hd-progress" id="hdVideoProgress">
-      <div class="hd-progress-bar"><span id="hdVideoProgressBar"></span></div>
-      <small id="hdVideoProgressText">0%</small>
-    </div>
-
-    <div class="hd-result" id="hdVideoResult"></div>
-  </div>
-
-  <div class="info-box">
-    <b>ⓘ Catatan</b>
-    <p>
-      Fitur ini berjalan di browser dan tidak membutuhkan API key.
-      “HD” pada video bekerja dengan render ulang/upscale ke resolusi pilihan;
-      video sumber yang kecil tidak dapat menghasilkan detail baru seperti AI upscaler.
-    </p>
   </div>
 
 </section>
-
-
 <!-- ================= DEVELOPER ================= -->
 
 <section class="page" id="developer">
@@ -814,7 +788,7 @@
   <span>© 2026</span>
 </footer>
 
+<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js"></script>
 <script type="module" src="app.js"></script>
-
 </body>
 </html>
