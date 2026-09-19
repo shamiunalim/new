@@ -1755,15 +1755,31 @@ document.addEventListener(
 
 
 // =========================================================
-// MAXIEL SETTINGS / THEME
+// MAXIEL SETTINGS / THEME + SPECIFIC COLORS
 // =========================================================
 const maxielThemeKey = "maxiel_theme"
-const maxielAccentKey = "maxiel_accent"
-const backgroundVideo = document.getElementById("backgroundVideo")
+const maxielColorsKey = "maxiel_dashboard_colors"
 const themeStatus = document.getElementById("themeStatus")
 const colorStatus = document.getElementById("colorStatus")
-const accentColor = document.getElementById("accentColor")
 const resetSettings = document.getElementById("resetSettings")
+
+const colorInputs = {
+  accent: document.getElementById("accentColor"),
+  background: document.getElementById("dashboardBgColor"),
+  topbar: document.getElementById("topbarColor"),
+  sidebar: document.getElementById("sidebarColor"),
+  card: document.getElementById("cardColor"),
+  text: document.getElementById("textColor")
+}
+
+const defaultDashboardColors = {
+  accent: "#087cff",
+  background: "#020817",
+  topbar: "#010712",
+  sidebar: "#020c1c",
+  card: "#03202e",
+  text: "#f4f7ff"
+}
 
 function hexToRgba(hex, alpha = .18) {
   const value = String(hex).replace("#", "")
@@ -1778,61 +1794,87 @@ function hexToRgba(hex, alpha = .18) {
   return `rgba(${r},${g},${b},${alpha})`
 }
 
-function applyMaxielAccent(color, save = true) {
-  const safe = /^#[0-9a-fA-F]{6}$/.test(String(color))
-    ? String(color).toLowerCase()
-    : "#087cff"
+function isHex(value) {
+  return /^#[0-9a-fA-F]{6}$/.test(String(value))
+}
 
-  document.body.style.setProperty("--accent", safe)
-  document.body.style.setProperty("--accent-soft", hexToRgba(safe, .18))
+function normalizeDashboardColors(colors = {}) {
+  const result = {}
+  for (const [key, fallback] of Object.entries(defaultDashboardColors)) {
+    result[key] = isHex(colors[key])
+      ? String(colors[key]).toLowerCase()
+      : fallback
+  }
+  return result
+}
 
-  if (accentColor) accentColor.value = safe
-  if (colorStatus) colorStatus.textContent = safe.toUpperCase()
+function applyDashboardColors(colors, save = true) {
+  const safe = normalizeDashboardColors(colors)
+  const root = document.body.style
+
+  root.setProperty("--accent", safe.accent)
+  root.setProperty("--accent-soft", hexToRgba(safe.accent, .18))
+  root.setProperty("--dashboard-bg", safe.background)
+  root.setProperty("--topbar-bg", hexToRgba(safe.topbar, .94))
+  root.setProperty("--sidebar-bg", hexToRgba(safe.sidebar, .96))
+  root.setProperty("--card-bg", hexToRgba(safe.card, .78))
+  root.setProperty("--text-main", safe.text)
+
+  Object.entries(colorInputs).forEach(([key, input]) => {
+    if (input) input.value = safe[key]
+  })
+
+  if (colorStatus) {
+    colorStatus.textContent = safe.accent.toUpperCase()
+  }
 
   document.querySelectorAll(".color-preset").forEach(button => {
     button.classList.toggle(
       "selected",
-      button.dataset.color?.toLowerCase() === safe
+      button.dataset.color?.toLowerCase() === safe.accent
     )
   })
 
-  if (save) localStorage.setItem(maxielAccentKey, safe)
+  if (save) {
+    localStorage.setItem(maxielColorsKey, JSON.stringify(safe))
+  }
+}
+
+function getCurrentDashboardColors() {
+  const result = {}
+  for (const [key, input] of Object.entries(colorInputs)) {
+    result[key] = input?.value || defaultDashboardColors[key]
+  }
+  return normalizeDashboardColors(result)
 }
 
 function applyMaxielTheme(theme, save = true) {
-  const safe = ["blue", "original", "video"].includes(theme)
+  const safe = ["blue", "original"].includes(theme)
     ? theme
     : "blue"
 
   document.body.classList.remove(
     "theme-blue",
-    "theme-original",
-    "theme-video"
+    "theme-original"
   )
   document.body.classList.add(`theme-${safe}`)
 
   if (themeStatus) {
-    themeStatus.textContent =
-      safe === "original"
-        ? "MAXIEL NEW"
-        : safe === "video"
-          ? "VIDEO"
-          : "BLUE"
+    themeStatus.textContent = safe === "original"
+      ? "MAXIEL NEW"
+      : "BLUE"
   }
 
   document.querySelectorAll(".theme-option").forEach(button => {
-    button.classList.toggle("selected", button.dataset.theme === safe)
+    button.classList.toggle(
+      "selected",
+      button.dataset.theme === safe
+    )
   })
 
-  if (backgroundVideo) {
-    if (safe === "video") {
-      backgroundVideo.play().catch(() => {})
-    } else {
-      backgroundVideo.pause()
-    }
+  if (save) {
+    localStorage.setItem(maxielThemeKey, safe)
   }
-
-  if (save) localStorage.setItem(maxielThemeKey, safe)
 }
 
 document.querySelectorAll(".theme-option").forEach(button => {
@@ -1842,30 +1884,46 @@ document.querySelectorAll(".theme-option").forEach(button => {
   })
 })
 
-document.querySelectorAll(".color-preset").forEach(button => {
-  button.addEventListener("click", () => {
-    applyMaxielAccent(button.dataset.color)
-    toast(`Warna aksen ${button.dataset.color.toUpperCase()} diterapkan.`)
+Object.entries(colorInputs).forEach(([key, input]) => {
+  input?.addEventListener("input", event => {
+    const colors = getCurrentDashboardColors()
+    colors[key] = event.target.value
+    applyDashboardColors(colors)
+    toast(`Warna ${key} langsung diterapkan.`)
   })
 })
 
-accentColor?.addEventListener("input", event => {
-  applyMaxielAccent(event.target.value)
+document.querySelectorAll(".color-preset").forEach(button => {
+  button.addEventListener("click", () => {
+    const colors = getCurrentDashboardColors()
+    colors.accent = button.dataset.color
+    applyDashboardColors(colors)
+    toast(`Warna menu aktif ${button.dataset.color.toUpperCase()} diterapkan.`)
+  })
 })
 
 resetSettings?.addEventListener("click", () => {
   localStorage.removeItem(maxielThemeKey)
-  localStorage.removeItem(maxielAccentKey)
+  localStorage.removeItem(maxielColorsKey)
   applyMaxielTheme("blue", false)
-  applyMaxielAccent("#087cff", false)
-  toast("Pengaturan Maxiel dikembalikan ke default.")
+  applyDashboardColors(defaultDashboardColors, false)
+  toast("Semua pengaturan warna dikembalikan ke default.")
 })
 
+let savedColors = defaultDashboardColors
+try {
+  const stored = JSON.parse(
+    localStorage.getItem(maxielColorsKey) || "null"
+  )
+  if (stored && typeof stored === "object") {
+    savedColors = normalizeDashboardColors(stored)
+  }
+} catch {}
+
+const savedTheme = localStorage.getItem(maxielThemeKey)
 applyMaxielTheme(
-  localStorage.getItem(maxielThemeKey) || "blue",
+  savedTheme === "original" ? "original" : "blue",
   false
 )
-applyMaxielAccent(
-  localStorage.getItem(maxielAccentKey) || "#087cff",
-  false
-)
+applyDashboardColors(savedColors, false)
+
