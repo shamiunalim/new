@@ -1927,3 +1927,1033 @@ applyMaxielTheme(
 )
 applyDashboardColors(savedColors, false)
 
+// =========================================================
+// MAXIEL TUTORIAL VIDEO PLAYER
+// =========================================================
+
+const tutorialVideo = document.getElementById("tutorialVideo")
+const tutorialVideoWrap = document.querySelector(".tutorial-video-wrap")
+const tutorialPlay = document.getElementById("tutorialPlay")
+const tutorialBigPlay = document.getElementById("tutorialBigPlay")
+const tutorialMute = document.getElementById("tutorialMute")
+const tutorialProgress = document.getElementById("tutorialProgress")
+const tutorialCurrentTime = document.getElementById("tutorialCurrentTime")
+const tutorialDuration = document.getElementById("tutorialDuration")
+const tutorialFullscreen = document.getElementById("tutorialFullscreen")
+const tutorialSpeedButton = document.getElementById("tutorialSpeedButton")
+const tutorialSpeed = document.querySelector(".tutorial-speed")
+const tutorialSpeedMenu = document.getElementById("tutorialSpeedMenu")
+const tutorialLoading = document.getElementById("tutorialVideoLoading")
+
+if (tutorialVideo) {
+
+  function tutorialFormatTime(seconds) {
+    if (!Number.isFinite(seconds)) {
+      return "00:00"
+    }
+
+    const minutes = Math.floor(seconds / 60)
+    const secs = Math.floor(seconds % 60)
+
+    return `${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`
+  }
+
+  function updateTutorialPlayUI() {
+
+    const playing =
+      !tutorialVideo.paused &&
+      !tutorialVideo.ended
+
+    if (tutorialPlay) {
+      tutorialPlay.textContent =
+        playing ? "Ⅱ" : "▶"
+    }
+
+    tutorialVideoWrap?.classList.toggle(
+      "playing",
+      playing
+    )
+  }
+
+  function toggleTutorialPlay() {
+
+    if (tutorialVideo.paused) {
+      tutorialVideo.play().catch(error => {
+        console.error(
+          "Tutorial video tidak dapat diputar:",
+          error
+        )
+      })
+    } else {
+      tutorialVideo.pause()
+    }
+
+  }
+
+  // PLAY / PAUSE
+  tutorialPlay?.addEventListener(
+    "click",
+    toggleTutorialPlay
+  )
+
+  tutorialBigPlay?.addEventListener(
+    "click",
+    toggleTutorialPlay
+  )
+
+  // Klik video untuk play / pause
+  tutorialVideo.addEventListener(
+    "click",
+    toggleTutorialPlay
+  )
+
+  // STATUS PLAY
+  tutorialVideo.addEventListener(
+    "play",
+    updateTutorialPlayUI
+  )
+
+  // STATUS PAUSE
+  tutorialVideo.addEventListener(
+    "pause",
+    updateTutorialPlayUI
+  )
+
+  // VIDEO SELESAI
+  tutorialVideo.addEventListener(
+    "ended",
+    () => {
+
+      updateTutorialPlayUI()
+
+      if (tutorialProgress) {
+        tutorialProgress.value = 0
+      }
+
+    }
+  )
+
+  // DATA VIDEO SIAP
+  tutorialVideo.addEventListener(
+    "loadedmetadata",
+    () => {
+
+      if (tutorialDuration) {
+        tutorialDuration.textContent =
+          tutorialFormatTime(
+            tutorialVideo.duration
+          )
+      }
+
+      if (tutorialProgress) {
+        tutorialProgress.max =
+          tutorialVideo.duration || 0
+
+        tutorialProgress.value = 0
+      }
+
+    }
+  )
+
+  // UPDATE WAKTU
+  tutorialVideo.addEventListener(
+    "timeupdate",
+    () => {
+
+      if (!tutorialVideo.duration) {
+        return
+      }
+
+      if (tutorialCurrentTime) {
+        tutorialCurrentTime.textContent =
+          tutorialFormatTime(
+            tutorialVideo.currentTime
+          )
+      }
+
+      if (tutorialProgress) {
+        tutorialProgress.value =
+          tutorialVideo.currentTime
+      }
+
+    }
+  )
+
+  // SEEK VIDEO
+  tutorialProgress?.addEventListener(
+    "input",
+    () => {
+
+      tutorialVideo.currentTime =
+        Number(
+          tutorialProgress.value
+        )
+
+    }
+  )
+
+  // MUTE
+  tutorialMute?.addEventListener(
+    "click",
+    () => {
+
+      tutorialVideo.muted =
+        !tutorialVideo.muted
+
+      tutorialMute.textContent =
+        tutorialVideo.muted
+          ? "🔇"
+          : "🔊"
+
+    }
+  )
+
+  // SPEED MENU
+  tutorialSpeedButton?.addEventListener(
+    "click",
+    event => {
+
+      event.stopPropagation()
+
+      tutorialSpeed?.classList.toggle(
+        "open"
+      )
+
+    }
+  )
+
+  // PILIH SPEED
+  tutorialSpeedMenu
+    ?.querySelectorAll("button")
+    .forEach(button => {
+
+      button.addEventListener(
+        "click",
+        () => {
+
+          const speed =
+            Number(
+              button.dataset.speed
+            )
+
+          if (!Number.isFinite(speed)) {
+            return
+          }
+
+          tutorialVideo.playbackRate =
+            speed
+
+          if (tutorialSpeedButton) {
+            tutorialSpeedButton.textContent =
+              `${speed}×`
+          }
+
+          tutorialSpeedMenu
+            .querySelectorAll("button")
+            .forEach(item => {
+              item.classList.remove("active")
+            })
+
+          button.classList.add("active")
+
+          tutorialSpeed?.classList.remove(
+            "open"
+          )
+
+        }
+      )
+
+    })
+
+  // TUTUP MENU SPEED KETIKA KLIK DI LUAR
+  document.addEventListener(
+    "click",
+    event => {
+
+      if (
+        tutorialSpeed &&
+        !tutorialSpeed.contains(event.target)
+      ) {
+        tutorialSpeed.classList.remove(
+          "open"
+        )
+      }
+
+    }
+  )
+
+  // FULLSCREEN
+  tutorialFullscreen?.addEventListener(
+    "click",
+    async () => {
+
+      try {
+
+        if (document.fullscreenElement) {
+
+          await document.exitFullscreen()
+
+        } else if (
+          tutorialVideoWrap?.requestFullscreen
+        ) {
+
+          await tutorialVideoWrap.requestFullscreen()
+
+        } else if (
+          tutorialVideo.webkitEnterFullscreen
+        ) {
+
+          tutorialVideo.webkitEnterFullscreen()
+
+        }
+
+      } catch (error) {
+
+        console.error(
+          "Fullscreen tutorial:",
+          error
+        )
+
+      }
+
+    }
+  )
+
+  // LOADING
+  tutorialVideo.addEventListener(
+    "waiting",
+    () => {
+
+      tutorialLoading?.classList.add(
+        "show"
+      )
+
+    }
+  )
+
+  tutorialVideo.addEventListener(
+    "playing",
+    () => {
+
+      tutorialLoading?.classList.remove(
+        "show"
+      )
+
+    }
+  )
+
+  tutorialVideo.addEventListener(
+    "canplay",
+    () => {
+
+      tutorialLoading?.classList.remove(
+        "show"
+      )
+
+    }
+  )
+
+  // ERROR
+  tutorialVideo.addEventListener(
+    "error",
+    () => {
+
+      tutorialLoading?.classList.remove(
+        "show"
+      )
+
+      toast(
+        "Video tutorial gagal dimuat."
+      )
+
+      console.error(
+        "Video tutorial gagal dimuat."
+      )
+
+    }
+  )
+
+  // DEFAULT SPEED
+  tutorialVideo.playbackRate = 1
+
+  // DEFAULT ICON
+  updateTutorialPlayUI()
+
+}
+
+// =========================================================
+// WEBSITE IDENTITY / PWA / CUSTOM APP ICON
+// =========================================================
+const webIdentityNameKey = "maxiel_web_identity_name"
+const webIdentityIconKey = "maxiel_web_identity_icon"
+const webIdentityInstallKey = "maxiel_web_identity_install"
+const defaultWebIdentityName = "Maxiel"
+const defaultWebIdentityIcon = "icon-192.png"
+
+const appNameInput = document.getElementById("appNameInput")
+const appIconFile = document.getElementById("appIconFile")
+const appIconPreview = document.getElementById("appIconPreview")
+const appNamePreview = document.getElementById("appNamePreview")
+const appIdentityStatus = document.getElementById("appIdentityStatus")
+const appInstallPreview = document.getElementById("appInstallPreview")
+const saveAppIdentity = document.getElementById("saveAppIdentity")
+const resetAppIdentity = document.getElementById("resetAppIdentity")
+const allowAppInstall = document.getElementById("allowAppInstall")
+const installAppButton = document.getElementById("installAppButton")
+const favicon = document.getElementById("favicon")
+const appleIcon = document.getElementById("appleIcon")
+const appManifest = document.getElementById("appManifest")
+const applicationNameMeta = document.getElementById("applicationNameMeta")
+const appleAppTitleMeta = document.getElementById("appleAppTitleMeta")
+const siteDescription = document.getElementById("siteDescription")
+const webIdentityLogo = document.getElementById("webIdentityLogo")
+const webIdentitySideLogo = document.getElementById("webIdentitySideLogo")
+const aiAvatarImage = document.getElementById("aiAvatarImage")
+
+let deferredInstallPrompt = null
+
+function cleanWebIdentityName(value) {
+  const name = String(value || "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 40)
+
+  return name || defaultWebIdentityName
+}
+
+function getWebIdentityName() {
+  return cleanWebIdentityName(
+    localStorage.getItem(webIdentityNameKey) ||
+    defaultWebIdentityName
+  )
+}
+
+function getWebIdentityIcon() {
+  return localStorage.getItem(webIdentityIconKey) || defaultWebIdentityIcon
+}
+
+function getStoredAppIconSet() {
+  try {
+    const raw = localStorage.getItem("maxiel_web_identity_icons")
+    return raw ? JSON.parse(raw) : null
+  } catch {
+    return null
+  }
+}
+
+function getWebIdentityIcons() {
+  const stored = getStoredAppIconSet()
+  if (stored?.icon192 && stored?.icon512) return stored
+
+  const icon = getWebIdentityIcon()
+  return {
+    icon192: icon,
+    icon512: icon
+  }
+}
+
+function applyWebIdentityText(name) {
+  const safeName = cleanWebIdentityName(name)
+  const upperName = safeName.toUpperCase()
+
+  document.querySelectorAll("[data-web-name]").forEach(el => {
+    el.textContent = safeName
+  })
+
+  document.querySelectorAll("[data-web-full]").forEach(el => {
+    el.textContent = `${safeName} Web`
+  })
+
+  document.title = safeName
+
+  if (applicationNameMeta) {
+    applicationNameMeta.content = safeName
+  }
+
+  if (appleAppTitleMeta) {
+    appleAppTitleMeta.content = safeName
+  }
+
+  if (siteDescription) {
+    siteDescription.content =
+      `${safeName} Web - Downloader, Converter & Tools`
+  }
+
+  // Semua label brand yang memang ditulis sebagai MAXIEL ikut berubah.
+  const walker = document.createTreeWalker(
+    document.body,
+    NodeFilter.SHOW_TEXT
+  )
+
+  const nodes = []
+  while (walker.nextNode()) {
+    nodes.push(walker.currentNode)
+  }
+
+  nodes.forEach(node => {
+    const parent = node.parentElement
+    if (!parent) return
+    if (
+      parent.closest("script,style,input,textarea,select") ||
+      parent.hasAttribute("data-brand-ignore")
+    ) {
+      return
+    }
+
+    if (node.nodeValue.includes("MAXIEL")) {
+      node.nodeValue = node.nodeValue.replaceAll("MAXIEL", upperName)
+    }
+  })
+}
+
+function applyWebIdentityIcon(icon) {
+  const safeIcon = icon || defaultWebIdentityIcon
+
+  // Satu foto identitas yang dipilih di Pengaturan dipakai bersama
+  // untuk ikon aplikasi, logo website, favicon, dan avatar AI.
+  if (favicon) favicon.href = safeIcon
+  if (appleIcon) appleIcon.href = safeIcon
+
+  if (appIconPreview) appIconPreview.src = safeIcon
+  if (webIdentityLogo) webIdentityLogo.src = safeIcon
+  if (webIdentitySideLogo) webIdentitySideLogo.src = safeIcon
+  if (aiAvatarImage) aiAvatarImage.src = safeIcon
+}
+
+function getCurrentSiteInfo() {
+  const url = new URL(window.location.href)
+  // Gunakan direktori halaman saat ini sebagai root aplikasi.
+  // Ini otomatis bekerja untuk user site maupun project site GitHub Pages.
+  const baseUrl = new URL(".", url.href)
+  baseUrl.hash = ""
+  baseUrl.search = ""
+
+  const cleanPath = url.pathname.replace(/^\/+|\/+$/g, "")
+  const segments = cleanPath ? cleanPath.split("/").filter(Boolean) : []
+  let repository = "Root / User Site"
+
+  if (url.hostname.endsWith(".github.io") && segments.length) {
+    repository = segments[0]
+  } else if (segments.length) {
+    repository = segments[0]
+  }
+
+  const pageName = cleanWebIdentityName(
+    document.title ||
+    document.querySelector('meta[name="application-name"]')?.content ||
+    defaultWebIdentityName
+  )
+
+  return {
+    siteUrl: baseUrl.href,
+    repository,
+    pageName
+  }
+}
+
+function updateCurrentSiteInfo() {
+  const info = getCurrentSiteInfo()
+  return info
+}
+
+async function buildDynamicManifest(name, icon) {
+  if (!appManifest) return
+
+  const icons = getWebIdentityIcons()
+  const siteInfo = updateCurrentSiteInfo()
+  const siteUrl = siteInfo.siteUrl
+  const manifest = {
+    name: cleanWebIdentityName(name),
+    short_name: cleanWebIdentityName(name).slice(0, 12),
+    id: siteUrl,
+    lang: "id",
+    description: `${cleanWebIdentityName(name)} Web - Downloader, Converter & Tools`,
+    start_url: siteUrl,
+    scope: siteUrl,
+    display: "standalone",
+    display_override: ["standalone", "fullscreen"],
+    orientation: "portrait-primary",
+    background_color: "#020817",
+    theme_color: "#020817",
+    prefer_related_applications: false,
+    icons: [
+      {
+        src: icons.icon192 || icon,
+        sizes: "192x192",
+        type: String(icons.icon192 || icon).startsWith("data:image/png") ? "image/png" : "image/jpeg",
+        purpose: "any"
+      },
+      {
+        src: icons.icon512 || icon,
+        sizes: "512x512",
+        type: String(icons.icon512 || icon).startsWith("data:image/png") ? "image/png" : "image/jpeg",
+        purpose: "any maskable"
+      }
+    ]
+  }
+
+  try {
+    // Gunakan Data URL supaya manifest berisi nama + ikon pilihan perangkat
+    // saat dialog install dibuka. Static manifest tetap menjadi fallback.
+    const manifestUrl =
+      "data:application/manifest+json;charset=utf-8," +
+      encodeURIComponent(JSON.stringify(manifest))
+
+    appManifest.href = manifestUrl
+    window.__maxielManifestUrl = manifestUrl
+  } catch (error) {
+    console.warn("Manifest dinamis tidak tersedia:", error)
+  }
+}
+
+function updateAppIdentityUI() {
+  const name = getWebIdentityName()
+  const icon = getWebIdentityIcon()
+  const allowed =
+    localStorage.getItem(webIdentityInstallKey) !== "false"
+
+  applyWebIdentityText(name)
+  applyWebIdentityIcon(icon)
+
+  if (appNameInput) appNameInput.value = name
+  if (appNamePreview) appNamePreview.textContent = name
+  if (appIdentityStatus) appIdentityStatus.textContent = name.toUpperCase().slice(0, 18)
+  if (allowAppInstall) allowAppInstall.checked = allowed
+
+  if (appInstallPreview) {
+    appInstallPreview.textContent =
+      allowed
+        ? "Siap dipasang sebagai aplikasi"
+        : "Pemasangan aplikasi dinonaktifkan"
+  }
+
+  if (installAppButton) {
+    // Tampilkan tombol meskipun Chrome belum mengirim beforeinstallprompt.
+    // Pada kondisi itu tombol akan memberikan langkah pemasangan manual.
+    installAppButton.hidden = !allowed
+  }
+
+  // Tampilkan situs/repository/page yang sedang digunakan secara otomatis.
+  updateCurrentSiteInfo()
+
+  // Penting: manifest install harus memakai identitas yang tersimpan,
+  // sekaligus root situs yang sedang dibuka, bukan origin root yang salah.
+  buildDynamicManifest(name, icon)
+}
+
+function readSelectedIcon(file) {
+  return new Promise((resolve, reject) => {
+    if (!file) {
+      resolve(null)
+      return
+    }
+
+    if (!/^image\/(png|jpeg|webp)$/.test(file.type)) {
+      reject(new Error("Format foto harus PNG, JPG atau WEBP."))
+      return
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      reject(new Error("Ukuran foto ikon maksimal 5 MB."))
+      return
+    }
+
+    const reader = new FileReader()
+
+    reader.onload = () => {
+      const image = new Image()
+      image.onload = () => {
+        try {
+          const makeIcon = size => {
+            const canvas = document.createElement("canvas")
+            canvas.width = size
+            canvas.height = size
+            const ctx = canvas.getContext("2d")
+            ctx.clearRect(0, 0, size, size)
+
+            // Crop ke bentuk kotak tanpa merusak rasio foto.
+            const sourceSize = Math.min(image.naturalWidth, image.naturalHeight)
+            const sx = (image.naturalWidth - sourceSize) / 2
+            const sy = (image.naturalHeight - sourceSize) / 2
+            ctx.drawImage(
+              image,
+              sx, sy, sourceSize, sourceSize,
+              0, 0, size, size
+            )
+
+            return canvas.toDataURL("image/png")
+          }
+
+          resolve({
+            icon192: makeIcon(192),
+            icon512: makeIcon(512)
+          })
+        } catch (error) {
+          reject(new Error("Foto ikon gagal diproses."))
+        }
+      }
+      image.onerror = () => reject(new Error("Foto ikon tidak dapat dibaca."))
+      image.src = reader.result
+    }
+    reader.onerror = () => reject(new Error("Foto ikon gagal dibaca."))
+    reader.readAsDataURL(file)
+  })
+}
+
+appIconFile?.addEventListener("change", async () => {
+  const file = appIconFile.files?.[0]
+  if (!file) return
+
+  try {
+    const data = await readSelectedIcon(file)
+    if (data?.icon512 && appIconPreview) {
+      appIconPreview.src = data.icon512
+      appInstallPreview.textContent = "Foto ikon siap disimpan"
+    }
+  } catch (error) {
+    appIconFile.value = ""
+    toast(error.message)
+  }
+})
+
+saveAppIdentity?.addEventListener("click", async () => {
+  const name = cleanWebIdentityName(appNameInput?.value)
+  let icons = getWebIdentityIcons()
+
+  try {
+    const file = appIconFile?.files?.[0]
+    if (file) {
+      icons = await readSelectedIcon(file)
+    }
+  } catch (error) {
+    toast(error.message)
+    return
+  }
+
+  localStorage.setItem(webIdentityNameKey, name)
+  localStorage.setItem(webIdentityIconKey, icons.icon512)
+  localStorage.setItem("maxiel_web_identity_icons", JSON.stringify(icons))
+  localStorage.setItem(
+    webIdentityInstallKey,
+    allowAppInstall?.checked === false ? "false" : "true"
+  )
+
+  updateWebIdentityManifestAndUI(name, icons.icon512)
+  toast(`Identitas ${name} berhasil disimpan.`)
+
+  if (appIconFile) appIconFile.value = ""
+
+  // Muat ulang setelah identitas disimpan agar Chrome membaca manifest
+  // dinamis yang baru sebelum membuat dialog pemasangan PWA.
+  setTimeout(() => location.reload(), 700)
+})
+
+function updateWebIdentityManifestAndUI(name, icon) {
+  const safeName = cleanWebIdentityName(name)
+  applyWebIdentityText(safeName)
+  applyWebIdentityIcon(icon)
+
+  if (appNameInput) appNameInput.value = safeName
+  if (appNamePreview) appNamePreview.textContent = safeName
+  if (appIdentityStatus) {
+    appIdentityStatus.textContent = safeName.toUpperCase().slice(0, 18)
+  }
+
+  const allowed =
+    localStorage.getItem(webIdentityInstallKey) !== "false"
+
+  if (appInstallPreview) {
+    appInstallPreview.textContent =
+      allowed
+        ? "Siap dipasang sebagai aplikasi"
+        : "Pemasangan aplikasi dinonaktifkan"
+  }
+
+  if (installAppButton) {
+    // Tampilkan tombol meskipun Chrome belum mengirim beforeinstallprompt.
+    // Pada kondisi itu tombol akan memberikan langkah pemasangan manual.
+    installAppButton.hidden = !allowed
+  }
+
+  // Segarkan manifest setelah nama/ikon disimpan agar dialog install
+  // membaca identitas terbaru, bukan Maxiel dari manifest default.
+  buildDynamicManifest(safeName, icon)
+
+  // beforeinstallprompt yang sudah dibuat sebelum perubahan manifest dapat
+  // masih membawa metadata lama. Buang prompt lama; browser akan membuat
+  // prompt baru setelah manifest dinamis dibaca ulang.
+  deferredInstallPrompt = null
+}
+
+allowAppInstall?.addEventListener("change", () => {
+  localStorage.setItem(
+    webIdentityInstallKey,
+    allowAppInstall.checked ? "true" : "false"
+  )
+
+  updateWebIdentityManifestAndUI(
+    getWebIdentityName(),
+    getWebIdentityIcon()
+  )
+})
+
+resetAppIdentity?.addEventListener("click", () => {
+  localStorage.removeItem(webIdentityNameKey)
+  localStorage.removeItem(webIdentityIconKey)
+  localStorage.removeItem("maxiel_web_identity_icons")
+  localStorage.removeItem(webIdentityInstallKey)
+
+  if (appNameInput) appNameInput.value = defaultWebIdentityName
+  if (appIconFile) appIconFile.value = ""
+
+  applyWebIdentityIcon(defaultWebIdentityIcon)
+  updateWebIdentityManifestAndUI(
+    defaultWebIdentityName,
+    defaultWebIdentityIcon
+  )
+
+  toast("Nama dan ikon kembali ke default.")
+})
+
+window.addEventListener("beforeinstallprompt", event => {
+  event.preventDefault()
+  deferredInstallPrompt = event
+
+  const allowed =
+    localStorage.getItem(webIdentityInstallKey) !== "false"
+
+  if (installAppButton) {
+    installAppButton.hidden = !allowed
+  }
+})
+
+installAppButton?.addEventListener("click", async () => {
+  if (!deferredInstallPrompt) {
+    toast("Di Chrome Android: tekan ⋮ > Tambahkan ke layar utama / Instal aplikasi.")
+    return
+  }
+
+  deferredInstallPrompt.prompt()
+
+  try {
+    await deferredInstallPrompt.userChoice
+  } catch {}
+
+  deferredInstallPrompt = null
+  installAppButton.hidden = true
+})
+
+window.addEventListener("appinstalled", () => {
+  deferredInstallPrompt = null
+  if (installAppButton) installAppButton.hidden = true
+  toast("Aplikasi berhasil dipasang.")
+})
+
+// Terapkan identitas sebelum pengguna berinteraksi dengan website.
+updateAppIdentityUI()
+
+// SERVICE WORKER / PWA
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js")
+      .catch(error => {
+        console.warn("Service worker belum aktif:", error)
+      })
+  })
+}
+
+// =========================
+// =========================
+// MAXIEL AI
+// =========================
+const aiForm = document.getElementById("aiForm")
+const aiInput = document.getElementById("aiInput")
+const aiMessages = document.getElementById("aiMessages")
+const aiTyping = document.getElementById("aiTyping")
+const aiSend = document.getElementById("aiSend")
+const clearAIChat = document.getElementById("clearAIChat")
+const aiProviderStatus = document.getElementById("aiProviderStatus")
+const resetAIProvider = document.getElementById("resetAIProvider")
+const aiProviderKey = "maxiel_ai_provider"
+const gptOssWorkerUrl = "https://maxiel.shamiunaje.workers.dev/api/ai"
+const maxielAIWorkerUrl = "https://maxiel-ganteng.shamiunaje.workers.dev/api/ai"
+
+function getAIProvider() {
+  const stored = localStorage.getItem(aiProviderKey)
+
+  // Versi lama: publicai = maxiel-ganteng, fromscratch = GPT-OSS.
+  if (stored === "publicai") return "maxiel"
+  if (stored === "fromscratch") return "gptoss"
+
+  // Default baru: Worker GPT-OSS FromScratch.
+  return stored === "maxiel" || stored === "gptoss" ? stored : "gptoss"
+}
+
+function getAIProviderLabel(provider = getAIProvider()) {
+  return provider === "maxiel" ? "MAXIEL AI" : "GPT-OSS 120B"
+}
+
+function syncAIProviderUI() {
+  const provider = getAIProvider()
+
+  document.querySelectorAll("[data-ai-provider]").forEach(button => {
+    button.classList.toggle("active", button.dataset.aiProvider === provider)
+  })
+
+  if (aiProviderStatus) {
+    aiProviderStatus.textContent = getAIProviderLabel(provider)
+  }
+
+  const name = getWebIdentityName()
+  if (aiTyping) {
+    aiTyping.innerHTML = `<span></span><span></span><span></span> ${provider === "maxiel" ? name + " AI" : "GPT-OSS 120B"} sedang mengetik...`
+  }
+}
+
+function setAIProvider(provider) {
+  const safeProvider = provider === "maxiel" ? "maxiel" : "gptoss"
+  localStorage.setItem(aiProviderKey, safeProvider)
+  syncAIProviderUI()
+  toast(`AI respons diubah ke ${getAIProviderLabel(safeProvider)}.`)
+}
+
+document.querySelectorAll("[data-ai-provider]").forEach(button => {
+  button.addEventListener("click", () => setAIProvider(button.dataset.aiProvider))
+})
+
+resetAIProvider?.addEventListener("click", () => {
+  localStorage.setItem(aiProviderKey, "gptoss")
+  syncAIProviderUI()
+  toast("AI respons kembali ke GPT-OSS 120B.")
+})
+
+function syncAIIdentity() {
+  const name = getWebIdentityName()
+  document.querySelectorAll("[data-ai-greeting-name]").forEach(el => {
+    el.textContent = name
+  })
+  if (aiInput) {
+    aiInput.placeholder = `Tulis pesan untuk ${name} AI...`
+  }
+}
+
+let aiWaiting = false
+syncAIIdentity()
+syncAIProviderUI()
+
+function aiTime(){
+  return new Date().toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit"})
+}
+
+function addAIMessage(text,type){
+  const bubble=document.createElement("div")
+  bubble.className=`ai-bubble ${type === "user" ? "ai-user" : "ai-bot"}`
+  const body=document.createElement("div")
+  body.textContent=text
+  const time=document.createElement("time")
+  time.textContent=aiTime()
+  bubble.append(body,time)
+  aiMessages.appendChild(bubble)
+  aiMessages.scrollTop=aiMessages.scrollHeight
+}
+
+async function askMaxielAI(query){
+  const provider = getAIProvider()
+  const url = provider === "maxiel"
+    ? `${maxielAIWorkerUrl}?query=${encodeURIComponent(query)}`
+    : `${gptOssWorkerUrl}?query=${encodeURIComponent(query)}`
+
+  const response=await fetch(url,{method:"GET",headers:{Accept:"application/json"},cache:"no-store"})
+  if(!response.ok){
+    const detail=await response.text()
+    throw new Error(`AI HTTP ${response.status}\n${detail.slice(0,1000)}`)
+  }
+  const result=await response.json()
+  const answer =
+    result?.data?.response ??
+    result?.data?.answer ??
+    result?.response ??
+    result?.answer ??
+    result?.data?.text ??
+    result?.text
+
+  if (typeof answer !== "string" || !answer.trim()) {
+    throw new Error("Respons AI kosong atau format respons berubah")
+  }
+
+  return answer.trim()
+}
+
+async function sendAIMessage(){
+  if(aiWaiting) return
+  const query=aiInput.value.trim()
+  if(!query) return
+
+  aiWaiting=true
+  aiSend.disabled=true
+  aiInput.disabled=true
+  aiTyping.classList.add("show")
+
+  // Tampilkan pesan pengguna terlebih dahulu.
+  addAIMessage(query,"user")
+  aiInput.value=""
+  aiInput.style.height="auto"
+  aiMessages.scrollTop=aiMessages.scrollHeight
+
+  try{
+    // Tunggu sampai API benar-benar memberikan respons.
+    const answer=await askMaxielAI(query)
+    addAIMessage(answer,"bot")
+  }catch(error){
+    console.error("Maxiel AI:",error)
+    addAIMessage("Maaf, Maxiel AI sedang mengalami masalah. Coba lagi beberapa saat lagi.","bot")
+  }finally{
+    aiTyping.classList.remove("show")
+    aiInput.disabled=false
+    aiSend.disabled=false
+    aiWaiting=false
+    aiInput.focus()
+  }
+}
+
+if(aiForm){
+  aiForm.addEventListener("submit",e=>{
+    e.preventDefault()
+    e.stopImmediatePropagation()
+    sendAIMessage()
+  })
+}
+
+if(aiSend){
+  aiSend.type="button"
+  aiSend.addEventListener("click",e=>{
+    e.preventDefault()
+    e.stopPropagation()
+    sendAIMessage()
+  })
+}
+
+if(aiInput){
+  aiInput.addEventListener("input",()=>{
+    aiInput.style.height="auto"
+    aiInput.style.height=Math.min(aiInput.scrollHeight,120)+"px"
+  })
+  aiInput.addEventListener("keydown",e=>{
+    if(e.key==="Enter"&&!e.shiftKey){
+      e.preventDefault()
+      e.stopPropagation()
+      sendAIMessage()
+    }
+  })
+}
+
+if(clearAIChat){
+  clearAIChat.type="button"
+  clearAIChat.addEventListener("click",e=>{
+    e.preventDefault()
+    e.stopPropagation()
+    if(aiWaiting) return
+    aiMessages.innerHTML=""
+    addAIMessage(`Chat dibersihkan. Halo 👋 Saya ${getWebIdentityName()} AI. Ada yang bisa saya bantu?`,"bot")
+  })
+}
