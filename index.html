@@ -4,8 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <meta name="theme-color" content="#020817">
-<meta name="description" content="Maxiel Nuoye ོ - Downloader, Converter & Tools">
-<title>Maxiel Nuoye ོ</title>
+<meta name="description" content="Maxiel Web - Downloader, Converter & Tools" id="siteDescription">
+<meta name="application-name" content="Maxiel" id="applicationNameMeta">
+<meta name="apple-mobile-web-app-title" content="Maxiel" id="appleAppTitleMeta">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Maxiel</title>
+<link rel="icon" id="favicon" href="icon-192.png">
+<link rel="apple-touch-icon" id="appleIcon" href="icon-192.png">
+<link rel="manifest" id="appManifest" href="manifest.json">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -80,9 +87,9 @@
   <button class="menu-btn" id="menuBtn">☰</button>
 
   <div class="brand">
-    <div class="brand-mark">M</div>
+    <div class="brand-mark"><img id="webIdentityLogo" class="brand-logo-image" src="icon-192.png" alt="Web"></div>
     <div class="brand-text">
-      <strong>MAXIEL</strong>
+      <strong data-web-name>MAXIEL</strong>
       <small>Web Dashboard</small>
     </div>
   </div>
@@ -96,7 +103,7 @@
 <aside class="sidebar" id="sidebar">
 
   <div class="side-brand">
-    <div class="side-logo">M</div>
+    <div class="side-logo"><img id="webIdentitySideLogo" src="icon-192.png" alt="Web"></div>
     <div>
       <strong>Maxiel Nuoye ོ</strong>
       <small>Personal Web</small>
@@ -112,6 +119,14 @@
         <small>Beranda</small>
       </div>
     </button>
+
+<button class="nav-item tutorial-nav" data-page="tutorial">
+  <span>▶</span>
+  <div>
+    <b>Tutorial</b>
+    <small>Cara menggunakan website</small>
+  </div>
+</button>
 
     <button class="nav-item" data-page="downloader">
       <span>⇩</span>
@@ -145,6 +160,14 @@
       </div>
     </button>
 
+    <button class="nav-item ai-nav" data-page="ai">
+      <span>✦</span>
+      <div>
+        <b>Maxiel AI</b>
+        <small>Chat AI Assistant</small>
+      </div>
+    </button>
+
     <button class="nav-item" data-page="settings">
       <span>⚙</span>
       <div>
@@ -169,15 +192,15 @@
 <section class="page active" id="dashboard">
 
   <div class="dashboard-heading">
-    <div><span>MAXIEL</span><b>/</b><strong>Dashboard</strong></div>
+    <div><span data-web-name>MAXIEL</span><b>/</b><strong>Dashboard</strong></div>
     <time id="dashboardTime">00.00.00</time>
   </div>
 
   <div class="hero dashboard-hero">
     <div class="hero-title">
-      <small>MAXIEL WEB</small>
+      <small><span data-web-name>MAXIEL</span> WEB</small>
       <h1>Halo, Pengguna 👋</h1>
-      <p>Selamat datang di Maxiel Web Dashboard. Pantau waktu, runtime dan informasi perangkat langsung dari browser.</p>
+      <p>Selamat datang di <span data-web-full>Maxiel Web</span> Dashboard. Pantau waktu, runtime dan informasi perangkat langsung dari browser.</p>
     </div>
     <div class="hero-actions">
       <button type="button" onclick="document.getElementById('clockCard').scrollIntoView({behavior:'smooth',block:'center'})">◷ <span>Lihat Runtime</span></button>
@@ -216,6 +239,17 @@
   </div>
 
   <div class="service-grid">
+
+<button class="service-card tutorial-service-card" data-open="tutorial">
+  <div class="tutorial-badge">BARU • TUTORIAL</div>
+  <div class="service-icon">▶</div>
+  <h3>Tutorial Penggunaan</h3>
+  <p>
+    Pelajari cara menggunakan Downloader,
+    Converter, Tools dan fitur lainnya di Maxiel Web.
+  </p>
+  <span>TONTON TUTORIAL →</span>
+</button>
 
     <button class="service-card" data-open="downloader">
       <div class="service-icon">⇩</div>
@@ -256,6 +290,222 @@
 
 </section>
 
+<!-- ================= TUTORIAL ================= -->
+
+<section class="page" id="tutorial">
+
+  <div class="page-header tutorial-page-header">
+    <small>MAXIEL TUTORIAL</small>
+    <h1>Cara Menggunakan Website</h1>
+    <p>
+      Ikuti video dari awal sampai selesai untuk mengetahui
+      cara menggunakan seluruh fitur <span data-web-full>Maxiel Web</span>.
+    </p>
+  </div>
+
+  <div class="tutorial-player-card">
+
+    <div class="tutorial-video-wrap">
+
+      <video
+        id="tutorialVideo"
+        preload="metadata"
+        playsinline
+        poster=""
+      >
+        <source
+          src="https://cdn.nekohime.site/file/j3rtce2f.mp4"
+          type="video/mp4"
+        >
+      </video>
+
+      <div
+        class="tutorial-big-play"
+        id="tutorialBigPlay">
+        ▶
+      </div>
+
+      <div
+        class="tutorial-video-loading"
+        id="tutorialVideoLoading">
+        <span></span>
+      </div>
+
+      <div
+        class="tutorial-controls"
+        id="tutorialControls">
+
+        <div class="tutorial-progress-row">
+
+          <span
+            id="tutorialCurrentTime">
+            00:00
+          </span>
+
+          <input
+            id="tutorialProgress"
+            class="tutorial-progress"
+            type="range"
+            min="0"
+            max="100"
+            value="0"
+            step="0.1"
+          >
+
+          <span
+            id="tutorialDuration">
+            00:00
+          </span>
+
+        </div>
+
+        <div class="tutorial-control-row">
+
+          <div class="tutorial-left-controls">
+
+            <button
+              type="button"
+              id="tutorialPlay"
+              class="video-control">
+              ▶
+            </button>
+
+            <button
+              type="button"
+              id="tutorialMute"
+              class="video-control">
+              🔊
+            </button>
+
+            <span
+              class="tutorial-video-title">
+              Maxiel Web Tutorial
+            </span>
+
+          </div>
+
+          <div class="tutorial-right-controls">
+
+            <div class="tutorial-speed">
+
+              <button
+                type="button"
+                id="tutorialSpeedButton"
+                class="video-control">
+                1×
+              </button>
+
+              <div
+                class="tutorial-speed-menu"
+                id="tutorialSpeedMenu">
+
+                <button data-speed="0.5">0.5×</button>
+                <button data-speed="0.75">0.75×</button>
+                <button data-speed="1" class="active">1×</button>
+                <button data-speed="1.25">1.25×</button>
+                <button data-speed="1.5">1.5×</button>
+                <button data-speed="2">2×</button>
+
+              </div>
+
+            </div>
+
+            <button
+              type="button"
+              id="tutorialFullscreen"
+              class="video-control">
+              ⛶
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="tutorial-video-info">
+
+      <div>
+        <small>VIDEO TUTORIAL</small>
+        <h2>Maxiel Web Dashboard</h2>
+        <p>
+          Video berjalan dari menit 0:00 sampai selesai.
+          Gunakan kontrol di bawah video untuk mengatur
+          pemutaran sesuai kebutuhan.
+        </p>
+      </div>
+
+      <a
+  class="tutorial-save"
+  id="tutorialSave"
+  href="https://cdn.nekohime.site/file/j3rtce2f.mp4"
+  download="Maxiel-Web-Tutorial.mp4"
+  target="_blank"
+  rel="noopener">
+  ↓ <span>Save Video</span>
+</a>
+
+    </div>
+
+  </div>
+
+  <div class="tutorial-thanks">
+
+    <div>
+      <small>SUDAH SELESAI MENONTON?</small>
+      <h2>Terima kasih sudah menggunakan Maxiel Web 🤍</h2>
+      <p>
+        Kalau tutorial ini membantu, kamu bisa mengirim
+        pesan langsung kepada developer.
+      </p>
+    </div>
+
+    <a
+      href="https://wa.me/6287766443103?text=terima%20kasih%20bang%20gantenggg%20%F0%9F%A4%8D"
+      target="_blank"
+      rel="noopener">
+      🤍 Terima kasih Bang Gantenggg
+    </a>
+
+  </div>
+
+</section>
+<!-- ================= AI ================= -->
+<section class="page" id="ai">
+  <div class="ai-page">
+    <div class="ai-page-heading">
+      <small><span data-web-name>MAXIEL</span> AI ASSISTANT</small>
+      <h1><span data-web-name>Maxiel</span> AI</h1>
+      <p>Chat langsung dengan AI melalui Worker <span data-web-name>Maxiel</span>.</p>
+    </div>
+
+    <div class="ai-chat-card">
+      <div class="ai-chat-head">
+        <div class="ai-avatar"><img id="aiAvatarImage" src="icon-192.png" alt="AI"></div>
+        <div class="ai-head-info">
+          <strong><span data-web-name>Maxiel</span> AI</strong>
+          <small><i></i> Online • Worker AI</small>
+        </div>
+        <button type="button" id="clearAIChat" class="ai-clear">Bersihkan</button>
+      </div>
+      <div class="ai-messages" id="aiMessages">
+        <div class="ai-bubble ai-bot">
+          <div>Halo 👋 Saya <span data-ai-greeting-name>Maxiel</span> AI. Ada yang bisa saya bantu?</div>
+          <time>sekarang</time>
+        </div>
+      </div>
+      <div class="ai-typing" id="aiTyping"><span></span><span></span><span></span> <span data-web-name>Maxiel</span> AI sedang mengetik...</div>
+      <form class="ai-input-area" id="aiForm">
+        <textarea id="aiInput" rows="1" maxlength="4000" placeholder="Tulis pesan untuk Maxiel AI..."></textarea>
+        <button type="button" id="aiSend" aria-label="Kirim">KIRIM <span>➤</span></button>
+      </form>
+      <div class="ai-input-hint">Enter untuk kirim • Shift + Enter untuk baris baru</div>
+    </div>
+  </div>
+</section>
+
 
 <!-- ================= SETTINGS ================= -->
 
@@ -264,7 +514,7 @@
   <div class="page-header settings-heading">
     <div>
       <small>PENGATURAN</small>
-      <h2>Tampilan Maxiel</h2>
+      <h2>Tampilan <span data-web-name>Maxiel</span></h2>
       <p>Atur background dan warna antarmuka. Pilihan disimpan otomatis di browser.</p>
     </div>
   </div>
@@ -339,6 +589,85 @@
         <button type="button" class="color-preset" data-color="#ff8a00" style="--preset:#ff8a00" aria-label="Oranye"></button>
       </div>
       <p class="live-color-note">Perubahan warna diterapkan langsung tanpa reload.</p>
+    </div>
+
+    <div class="settings-card app-identity-card">
+      <div class="settings-card-head">
+        <div>
+          <small>IDENTITAS WEBSITE</small>
+          <h3>Nama & Ikon Aplikasi</h3>
+        </div>
+        <span class="settings-badge" id="appIdentityStatus">MAXIEL</span>
+      </div>
+      <div class="app-identity-preview">
+        <div class="app-icon-preview-large">
+          <img id="appIconPreview" src="icon-192.png" alt="Preview ikon aplikasi">
+        </div>
+        <div class="app-identity-preview-text">
+          <small>PREVIEW</small>
+          <strong id="appNamePreview">Maxiel</strong>
+          <span id="appInstallPreview">Siap dipasang sebagai aplikasi</span>
+        </div>
+      </div>
+      <div class="app-identity-form">
+        <label class="app-field">
+          <span>Nama website / aplikasi</span>
+          <input id="appNameInput" type="text" maxlength="40" value="Maxiel" placeholder="Contoh: Maxiel Web">
+        </label>
+        <label class="app-upload">
+          <span class="app-upload-icon">📷</span>
+          <div>
+            <b>Ganti Foto Ikon</b>
+            <small>PNG, JPG atau WEBP • foto akan menjadi ikon</small>
+          </div>
+          <input id="appIconFile" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+        </label>
+        <div class="app-icon-actions">
+          <button type="button" id="saveAppIdentity" class="settings-save-app">SIMPAN NAMA & IKON</button>
+          <button type="button" id="resetAppIdentity" class="settings-reset">Kembalikan Default</button>
+        </div>
+        <label class="app-install-toggle">
+          <div>
+            <b>Izinkan pemasangan aplikasi</b>
+            <small>Jika dimatikan, tombol install tidak ditampilkan.</small>
+          </div>
+          <span class="switch">
+            <input type="checkbox" id="allowAppInstall" checked>
+            <span></span>
+          </span>
+        </label>
+        <button type="button" id="installAppButton" class="install-app-button">▣ PASANG KE HP</button>
+        <div class="app-install-help">
+          <b>Hasil pemasangan:</b> Maxiel akan muncul sebagai ikon di layar utama HP. Saat ikon itu ditekan, website Maxiel terbuka seperti aplikasi dan tidak perlu mengetik alamat lagi.
+          <br><br>Jika tombol tidak membuka dialog otomatis, gunakan <b>Chrome ⋮ → Tambahkan ke layar utama / Instal aplikasi</b>.
+          <br><small>Catatan: ini adalah <b>PWA</b> (web app), bukan file APK. Ikon/nama yang sudah terpasang dikelola Android/Chrome dan tidak dapat dipaksa berubah hanya dari JavaScript website.</small>
+        </div>
+      </div>
+      <p class="live-color-note">Nama dan foto ikon di halaman ini tersimpan di perangkat. Favicon dan tampilan website mengikuti pengaturan. Untuk ikon/nama launcher PWA yang benar-benar berubah setelah instalasi, manifest dan file ikon harus diperbarui di server lalu PWA dipasang ulang.</p>
+    </div>
+
+    
+
+    <div class="settings-card ai-provider-card">
+      <div class="settings-card-head">
+        <div>
+          <small>AI RESPONSE</small>
+          <h3>Pilih Mesin AI</h3>
+        </div>
+        <span class="settings-badge" id="aiProviderStatus">GPT-OSS 120B</span>
+      </div>
+      <p class="live-color-note">Pilih AI yang digunakan saat tombol KIRIM ditekan. Pilihan disimpan di perangkat ini. GPT-OSS 120B menjadi AI default melalui Worker FromScratch, sedangkan Maxiel AI memakai Worker maxiel-ganteng.</p>
+      <div class="ai-provider-options">
+        <button type="button" class="ai-provider-option" data-ai-provider="gptoss">
+          <strong>GPT-OSS 120B</strong>
+          <small>Default • Worker FromScratch</small>
+        </button>
+        <button type="button" class="ai-provider-option" data-ai-provider="maxiel">
+          <strong>Maxiel AI</strong>
+          <small>Worker Maxiel • maxiel-ganteng</small>
+        </button>
+      </div>
+      <button type="button" id="resetAIProvider" class="settings-reset">Kembali ke GPT-OSS 120B</button>
     </div>
 
     <div class="settings-card settings-reset-card">
