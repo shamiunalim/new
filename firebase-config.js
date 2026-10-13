@@ -1,0 +1,2 @@
+// Ganti nilai placeholder dengan config Web App dari Firebase Console > Project settings > General.
+window.ALIM_FIREBASE_CONFIG={apiKey:"ISI_API_KEY",authDomain:"ISI_PROJECT_ID.firebaseapp.com",projectId:"ISI_PROJECT_ID",storageBucket:"ISI_PROJECT_ID.appspot.com",messagingSenderId:"ISI_MESSAGING_SENDER_ID",appId:"ISI_APP_ID"};
